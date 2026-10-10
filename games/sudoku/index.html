@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>数独</title>
+<meta name="theme-color" content="#1B2430">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="数独">
+<!-- 専用アイコン画像はまだ無いため、faviconはSVGをその場で埋め込んでいる -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='6' fill='%23FFFDF7' stroke='%231B2430' stroke-width='3'/%3E%3Cpath d='M23 4v56M41 4v56M4 23h56M4 41h56' stroke='%231B2430' stroke-width='2'/%3E%3Ctext x='32' y='38' font-size='16' font-weight='bold' text-anchor='middle' fill='%231565C0'%3E9%3C/text%3E%3C/svg%3E">
+
+<!--
+  【uniiqcode.github.io 公開用コピー】2026年10月、niisan-tvリポジトリの
+  frontend/sudoku/sudoku02.html を複製。変更点は[メニュー]のリンク先を相対パス(../)にしたことのみ。
+  公開URL: https://uniiqcode.github.io/games/sudoku/
+
+  sudoku/sudoku02.html: スマホ向け数独(ナンプレ) 第2版
+
+  ・2026年10月、sudoku/index.html を複製して保存した完成版。ゲームメニュー
+    (games/index.html)からはこの版を開く。index.html は今後の改良版の作業場所。
+  ・第1版(sudoku01.html)からの変更: 横向きの時はメニューを左端に縦に並べ、盤面を
+    大きく表示する。メニューの最後に[メニュー](ゲームメニューへ戻るリンク)を追加。
+  ・保存データ(localStorage)のキー名は第1版と同じ sudoku01-* を使い、
+    途中経過・ベスト記録を引き継ぐ。
+
+  ・このファイル1枚で完結(外部JS/CSSなし、サーバーAPIなし)。問題は毎回その場で自動生成する。
+  ・難易度は「手がかりの数」と「解くのに必要な手筋」で分けている。
+      初級: 手がかり約38個。各マスの候補が1つに絞れる(ネイキッドシングル)だけで解ける。
+      中級: 手がかり約30個。行・列・ブロック内で入る場所が1か所しかない数字を探す
+            (ヒドゥンシングル)手筋まで使えば解ける。
+      上級: 手がかり約25個。上の2つの手筋だけでは解けない問題(答えは必ず1通り)。
+  ・操作: マスをタップして選び、下の数字ボタンで入力。「メモ」をONにすると候補の書き込み。
+          PCではキーボード(1〜9、矢印、Backspace、Mでメモ切替)でも操作できる。
+  ・行・列・ブロックで同じ数字がぶつかっていると赤く表示する(正解かどうかは教えない)。
+  ・途中経過・難易度別のベスト記録はlocalStorageに保存する。
+-->
+<style>
+  :root {
+    --bg: #1B2430;
+    --bar: rgba(0, 0, 0, 0.25);
+    --text: #F3F1E8;
+    --paper: #FFFDF7;
+    --line: #B9B4A6;
+    --line-bold: #1B2430;
+    --given: #1B1B1B;
+    --user: #1565C0;
+    --note: #5F6B7A;
+    --peer: #EDE8D8;
+    --same: #CFE0F5;
+    --sel: #9EC3EE;
+    --err: #C62828;
+    --err-bg: #F8D7D7;
+    --accent: #FFD54F;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  }
+  body {
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  button { font: inherit; touch-action: manipulation; }
+
+  /* ---- 上部バー ---- */
+  .bar { flex: none; display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: var(--bar); }
+  /* 【2026年10月】[メニュー]はゲームメニュー(games/index.html)へ戻るリンク。
+     見た目はボタンと同じにしている。途中経過は自動保存されるので確認は出さない。 */
+  .bar button, .levels button, .bar .menu-link {
+    font-size: 14px; color: var(--text);
+    background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px; padding: 6px 8px; min-height: 34px;
+  }
+  .bar .menu-link { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+  .bar button:active, .levels button:active, .bar .menu-link:active { background: rgba(255, 255, 255, 0.28); }
+  .levels { display: flex; gap: 4px; }
+  .levels button.on { background: var(--accent); color: #222; border-color: var(--accent); font-weight: bold; }
+  .stats { margin-left: auto; text-align: right; font-size: 13px; line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  /* 難易度はボタンの色で分かるため、時間の下の難易度名は出さない([メニュー]を並べる幅を確保) */
+  #infoLabel { display: none; }
+
+  /* 幅の狭いスマホ(iPhone SE初代など幅320px級)の縦向きでは、ボタンの文字が
+     2行に折れないよう、文字と余白を少し小さくする */
+  .bar button, .levels button, .bar .menu-link { white-space: nowrap; }
+  @media (orientation: portrait) and (max-width: 380px) {
+    .bar { gap: 4px; padding: 8px 6px; }
+    .levels { gap: 4px; }
+    .bar button, .levels button, .bar .menu-link { font-size: 12px; padding: 6px 6px; }
+  }
+
+  /* 【2026年10月】横向きの時は、メニューを左端に縦に並べる(ソリティアと同じ、niisan要望)。
+     上段のバーの高さ分を盤面に回し、マスと数字を少しでも大きく見せるため。 */
+  @media (orientation: landscape) {
+    body { flex-direction: row; }
+    .bar {
+      flex-direction: column; align-items: stretch; justify-content: flex-start;
+      gap: 8px; padding: 10px 8px; width: 92px;
+    }
+    .levels { flex-direction: column; gap: 8px; }
+    .bar button, .levels button, .bar .menu-link { padding: 6px 4px; min-height: 40px; font-size: 13px; }
+    .stats { margin-left: 0; margin-top: auto; text-align: center; font-size: 14px; }
+  }
+
+  /* ---- 盤面と入力ボタン ---- */
+  #main {
+    flex: 1; min-height: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; padding: 10px 12px;
+  }
+  #grid {
+    display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr);
+    background: var(--paper); border: 3px solid var(--line-bold); border-radius: 4px;
+    touch-action: manipulation;
+  }
+  .cell {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    color: var(--user); font-weight: 500; line-height: 1;
+  }
+  .cell.c2, .cell.c5 { border-right: 2px solid var(--line-bold); }
+  .cell.c8 { border-right: none; }
+  .cell.r2, .cell.r5 { border-bottom: 2px solid var(--line-bold); }
+  .cell.r8 { border-bottom: none; }
+  .cell.given { color: var(--given); font-weight: 700; }
+  .cell.peer { background: var(--peer); }
+  .cell.same { background: var(--same); }
+  .cell.sel { background: var(--sel); }
+  .cell.err { color: var(--err); }
+  .cell.err.given { background: var(--err-bg); }
+  .cell .notes {
+    position: absolute; inset: 1px; display: grid;
+    grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+    color: var(--note); font-weight: 400;
+  }
+  .cell .notes span { display: flex; align-items: center; justify-content: center; }
+  .cell .notes span.hl { color: var(--user); font-weight: 700; }
+
+  #pad { display: flex; flex-direction: column; gap: 8px; }
+  .nums { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; }
+  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .nums button {
+    position: relative; aspect-ratio: 0.8; font-size: 24px; font-weight: 600;
+    color: var(--paper); background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px; padding: 0;
+  }
+  .nums button small { position: absolute; right: 4px; bottom: 2px; font-size: 10px; font-weight: 400; opacity: 0.6; }
+  .nums button:active, .tools button:active { background: rgba(255, 255, 255, 0.3); }
+  .nums button:disabled { opacity: 0.2; }
+  #pad.memo .nums button { color: var(--accent); }
+  .tools button {
+    font-size: 14px; color: var(--text); background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px; padding: 10px 0;
+  }
+  .tools button.on { background: var(--accent); color: #222; border-color: var(--accent); font-weight: bold; }
+
+  /* 横向きの時は盤面の右に入力ボタンを並べる */
+  @media (orientation: landscape) {
+    #main { flex-direction: row; gap: 20px; }
+    .nums { grid-template-columns: repeat(3, 1fr); }
+    .nums button { aspect-ratio: 1.3; }
+    .tools { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---- 生成中・クリア画面 ---- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 10; display: none;
+    align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55);
+  }
+  .overlay.show { display: flex; }
+  .dialog {
+    background: var(--paper); color: #222; border-radius: 16px; padding: 24px 28px;
+    text-align: center; min-width: 240px; max-width: calc(100vw - 32px);
+  }
+  .dialog h2 { margin: 0 0 12px; font-size: 24px; }
+  .dialog p { margin: 4px 0; font-size: 15px; }
+  .dialog button {
+    margin-top: 16px; font-size: 16px; font-weight: bold; color: #fff;
+    background: var(--bg); border: none; border-radius: 10px; padding: 10px 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <button id="newBtn">新しく</button>
+  <div class="levels">
+    <button data-level="0">初級</button>
+    <button data-level="1">中級</button>
+    <button data-level="2">上級</button>
+  </div>
+  <div class="stats">
+    <div id="timeLabel">0:00</div>
+    <div id="infoLabel"></div>
+  </div>
+  <a class="menu-link" href="../">メニュー</a>
+</div>
+
+<div id="main">
+  <div id="grid"></div>
+  <div id="pad">
+    <div class="nums"></div>
+    <div class="tools">
+      <button id="undoBtn">戻す</button>
+      <button id="eraseBtn">消す</button>
+      <button id="memoBtn">メモ</button>
+      <button id="hintBtn">ヒント</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="busy"><div class="dialog"><p>問題を作っています…</p></div></div>
+<div class="overlay" id="clear">
+  <div class="dialog">
+    <h2>クリア！</h2>
+    <p id="resultText"></p>
+    <p id="recordText"></p>
+    <button id="againBtn">次の問題</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var LEVEL_NAMES = ['初級', '中級', '上級'];
+  var TARGET_CLUES = [38, 30, 25];
+  var SAVE_KEY = 'sudoku01-state-v1';
+  var STATS_KEY = 'sudoku01-stats-v1';
+  var ALL = 0x3FE;  // ビット1〜9
+
+  // ---------- 盤面の構造(行・列・ブロックと、各マスの関係するマス) ----------
+  var UNITS = [], PEERS = [];
+  (function () {
+    var r, c, i;
+    for (r = 0; r < 9; r++) { var row = []; for (c = 0; c < 9; c++) row.push(r * 9 + c); UNITS.push(row); }
+    for (c = 0; c < 9; c++) { var col = []; for (r = 0; r < 9; r++) col.push(r * 9 + c); UNITS.push(col); }
+    for (var b = 0; b < 9; b++) {
+      var box = [], br = Math.floor(b / 3) * 3, bc = (b % 3) * 3;
+      for (r = 0; r < 3; r++) for (c = 0; c < 3; c++) box.push((br + r) * 9 + bc + c);
+      UNITS.push(box);
+    }
+    for (i = 0; i < 81; i++) {
+      var set = {};
+      UNITS.forEach(function (u) { if (u.indexOf(i) >= 0) u.forEach(function (j) { if (j !== i) set[j] = true; }); });
+      PEERS.push(Object.keys(set).map(Number));
+    }
+  })();
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function bitCount(m) { var n = 0; while (m) { m &= m - 1; n++; } return n; }
+  function candMask(g, i) {
+    var used = 0, p = PEERS[i];
+    for (var k = 0; k < p.length; k++) used |= 1 << g[p[k]];
+    return ALL & ~used;
+  }
+
+  // ---------- 解く(答えの個数を数える、limit個見つかったら打ち切り) ----------
+  function countSolutions(g, limit) {
+    var best = -1, bestMask = 0, bestN = 10;
+    for (var i = 0; i < 81; i++) {
+      if (g[i]) continue;
+      var m = candMask(g, i), n = bitCount(m);
+      if (n === 0) return 0;
+      if (n < bestN) { best = i; bestMask = m; bestN = n; if (n === 1) break; }
+    }
+    if (best < 0) return 1;
+    var total = 0;
+    for (var d = 1; d <= 9 && total < limit; d++) {
+      if (!(bestMask & (1 << d))) continue;
+      g[best] = d;
+      total += countSolutions(g, limit - total);
+    }
+    g[best] = 0;
+    return total;
+  }
+
+  // 答えのある盤面をランダムに作る
+  function fillRandom(g) {
+    for (var i = 0; i < 81; i++) {
+      if (g[i]) continue;
+      var digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var m = candMask(g, i);
+      for (var k = 0; k < 9; k++) {
+        if (!(m & (1 << digits[k]))) continue;
+        g[i] = digits[k];
+        if (fillRandom(g)) return true;
+      }
+      g[i] = 0;
+      return false;
+    }
+    return true;
+  }
+
+  // 手筋だけで解けるか(useHidden=falseならネイキッドシングルのみ)
+  function solvableBySingles(puzzle, useHidden) {
+    var g = puzzle.slice(), progress = true;
+    while (progress) {
+      progress = false;
+      for (var i = 0; i < 81; i++) {
+        if (g[i]) continue;
+        var m = candMask(g, i);
+        if (!m) return false;
+        if (bitCount(m) === 1) { g[i] = Math.log2(m); progress = true; }
+      }
+      if (progress || !useHidden) continue;
+      for (var u = 0; u < 27; u++) {
+        var unit = UNITS[u];
+        for (var d = 1; d <= 9; d++) {
+          var spot = -1, n = 0, placed = false;
+          for (var k = 0; k < 9; k++) {
+            var j = unit[k];
+            if (g[j] === d) { placed = true; break; }
+            if (!g[j] && (candMask(g, j) & (1 << d))) { spot = j; n++; }
+          }
+          if (!placed && n === 1) { g[spot] = d; progress = true; }
+        }
+      }
+    }
+    return g.indexOf(0) < 0;
+  }
+
+  // 問題を作る
+  function generate(level) {
+    var attempt, best = null;
+    for (attempt = 0; attempt < 30; attempt++) {
+      var solution = new Array(81).fill(0);
+      fillRandom(solution);
+      var p = solution.slice(), clues = 81;
+      var order = shuffle(Array.from({ length: 81 }, function (_, i) { return i; }));
+      for (var k = 0; k < 81 && clues > TARGET_CLUES[level]; k++) {
+        var i = order[k], v = p[i];
+        p[i] = 0;
+        // 手筋で解ける問題は答えが1通りなので、初級・中級は手筋チェックだけでよい
+        var ok = level === 2 ? countSolutions(p.slice(), 2) === 1 : solvableBySingles(p, level === 1);
+        if (ok) clues--; else p[i] = v;
+      }
+      best = { puzzle: p, solution: solution };
+      if (level === 0) break;
+      // 中級: ネイキッドシングルだけで解けてしまう問題は作り直す
+      if (level === 1 && !solvableBySingles(p, false)) break;
+      // 上級: 中級の手筋だけで解けてしまう問題は作り直す
+      if (level === 2 && !solvableBySingles(p, true)) break;
+    }
+    return best;
+  }
+
+  // ---------- 状態 ----------
+  var gridEl = document.getElementById('grid');
+  var padEl = document.getElementById('pad');
+  var numsEl = padEl.querySelector('.nums');
+  var cells = [], numBtns = [];
+  var state;        // {level, puzzle, solution, values, notes, elapsed, hints, done}
+  var history = [];
+  var sel = -1;
+  var memo = false;
+  var timerStart = null;
+
+  function storageGet(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+  function storageSet(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* 保存できない環境では無視 */ } }
+
+  function currentElapsed() { return state ? state.elapsed + (timerStart ? Date.now() - timerStart : 0) : 0; }
+  function startTimer() { if (!timerStart && state && !state.done) timerStart = Date.now(); }
+  function stopTimer() { if (state) state.elapsed = currentElapsed(); timerStart = null; }
+  function fmtTime(ms) { var s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+
+  function save() {
+    if (!state) return;
+    var copy = Object.assign({}, state, { elapsed: currentElapsed() });
+    storageSet(SAVE_KEY, { state: copy, history: history.slice(-200) });
+  }
+
+  function newGame(level) {
+    var busy = document.getElementById('busy');
+    busy.classList.add('show');
+    document.getElementById('clear').classList.remove('show');
+    setTimeout(function () {
+      var g = generate(level);
+      state = {
+        level: level, puzzle: g.puzzle, solution: g.solution, values: g.puzzle.slice(),
+        notes: new Array(81).fill(0), elapsed: 0, hints: 0, done: false
+      };
+      history = []; sel = -1; timerStart = null;
+      startTimer();
+      busy.classList.remove('show');
+      save(); render();
+    }, 30);
+  }
+
+  function inProgress() {
+    if (!state || state.done) return false;
+    return state.values.some(function (v, i) { return v && !state.puzzle[i]; });
+  }
+
+  // ---------- 入力 ----------
+  function snapshot() {
+    history.push(JSON.stringify({ values: state.values, notes: state.notes }));
+    if (history.length > 500) history.shift();
+  }
+  function editable(i) { return i >= 0 && !state.puzzle[i] && !state.done; }
+
+  function setValue(i, d) {
+    if (!editable(i)) return;
+    snapshot();
+    state.values[i] = state.values[i] === d ? 0 : d;
+    if (state.values[i]) {
+      state.notes[i] = 0;
+      // 同じ行・列・ブロックのメモから、この数字を消す
+      PEERS[i].forEach(function (j) { state.notes[j] &= ~(1 << d); });
+    }
+    afterEdit();
+  }
+  function toggleNote(i, d) {
+    if (!editable(i) || state.values[i]) return;
+    snapshot();
+    state.notes[i] ^= 1 << d;
+    afterEdit();
+  }
+  function erase() {
+    if (!editable(sel) || (!state.values[sel] && !state.notes[sel])) return;
+    snapshot();
+    state.values[sel] = 0; state.notes[sel] = 0;
+    afterEdit();
+  }
+  function undo() {
+    if (!history.length || state.done) return;
+    var prev = JSON.parse(history.pop());
+    state.values = prev.values; state.notes = prev.notes;
+    afterEdit();
+  }
+  function hint() {
+    if (state.done) return;
+    var i = sel;
+    if (!editable(i) || state.values[i] === state.solution[i]) {
+      // 選択中のマスが埋まっていれば、空いている(または間違っている)マスから選ぶ
+      var cand = [];
+      for (var k = 0; k < 81; k++) if (!state.puzzle[k] && state.values[k] !== state.solution[k]) cand.push(k);
+      if (!cand.length) return;
+      i = cand[Math.floor(Math.random() * cand.length)];
+    }
+    sel = i;
+    state.hints++;
+    state.values[i] = 0;
+    setValue(i, state.solution[i]);
+  }
+  function input(d) {
+    if (sel < 0) return;
+    if (memo) toggleNote(sel, d); else setValue(sel, d);
+  }
+
+  function afterEdit() {
+    var solved = state.values.every(function (v, i) { return v === state.solution[i]; });
+    if (solved && !state.done) {
+      state.done = true;
+      stopTimer();
+      recordClear();
+    }
+    save(); render();
+  }
+
+  function recordClear() {
+    var stats = storageGet(STATS_KEY) || {};
+    var key = 'L' + state.level;
+    var s = stats[key] || { clears: 0, best: null };
+    s.clears++;
+    var isBest = !state.hints && (s.best === null || state.elapsed < s.best);
+    if (isBest) s.best = state.elapsed;
+    stats[key] = s;
+    storageSet(STATS_KEY, stats);
+    document.getElementById('resultText').textContent =
+      LEVEL_NAMES[state.level] + ' ・ ' + fmtTime(state.elapsed) + (state.hints ? ' ・ ヒント' + state.hints + '回' : '');
+    document.getElementById('recordText').textContent =
+      (isBest ? 'ベスト記録！ ' : (s.best !== null ? 'ベスト ' + fmtTime(s.best) + ' ・ ' : '')) +
+      LEVEL_NAMES[state.level] + 'クリア ' + s.clears + '回';
+    setTimeout(function () { document.getElementById('clear').classList.add('show'); }, 500);
+  }
+
+  // ---------- 描画 ----------
+  function buildDom() {
+    for (var i = 0; i < 81; i++) {
+      var el = document.createElement('div');
+      el.className = 'cell r' + Math.floor(i / 9) + ' c' + (i % 9);
+      el.dataset.i = i;
+      gridEl.appendChild(el);
+      cells.push(el);
+    }
+    for (var d = 1; d <= 9; d++) {
+      var b = document.createElement('button');
+      b.dataset.d = d;
+      numsEl.appendChild(b);
+      numBtns.push(b);
+    }
+  }
+
+  function computeSize() {
+    var main = document.getElementById('main');
+    var W = main.clientWidth - 24, H = main.clientHeight - 20;
+    var landscape = window.matchMedia('(orientation: landscape)').matches;
+    var size;
+    if (landscape) {
+      size = Math.min(H, (W - 20) * 0.6);
+      padEl.style.width = Math.min(W - 20 - size, size * 0.75) + 'px';
+    } else {
+      // 入力ボタンの高さ(数字1段+道具1段)を引いた残りで、盤面の大きさを決める
+      var padH = (W - 40) / 9 / 0.8 + 50 + 22;
+      size = Math.min(W, H - padH);
+      padEl.style.width = size + 'px';
+    }
+    size = Math.floor(Math.max(200, size));
+    gridEl.style.width = size + 'px';
+    gridEl.style.height = size + 'px';
+    var cell = size / 9;
+    cells.forEach(function (el) { el.style.fontSize = Math.round(cell * 0.6) + 'px'; });
+    gridEl.style.setProperty('--note-size', Math.round(cell * 0.27) + 'px');
+    render();
+  }
+
+  function render() {
+    if (!state) return;
+    var v = state.values;
+    var selVal = sel >= 0 ? v[sel] : 0;
+    var noteSize = gridEl.style.getPropertyValue('--note-size');
+    var counts = new Array(10).fill(0);
+    for (var i = 0; i < 81; i++) {
+      var el = cells[i], d = v[i];
+      if (d) counts[d]++;
+      var conflict = d && PEERS[i].some(function (j) { return v[j] === d; });
+      var cls = 'cell r' + Math.floor(i / 9) + ' c' + (i % 9);
+      if (state.puzzle[i]) cls += ' given';
+      if (conflict) cls += ' err';
+      if (i === sel) cls += ' sel';
+      else if (selVal && d === selVal) cls += ' same';
+      else if (sel >= 0 && PEERS[sel].indexOf(i) >= 0) cls += ' peer';
+      el.className = cls;
+      if (d) {
+        el.textContent = d;
+      } else if (state.notes[i]) {
+        var html = '<div class="notes" style="font-size:' + noteSize + '">';
+        for (var n = 1; n <= 9; n++) {
+          var has = state.notes[i] & (1 << n);
+          html += '<span' + (has && n === selVal ? ' class="hl"' : '') + '>' + (has ? n : '') + '</span>';
+        }
+        el.innerHTML = html + '</div>';
+      } else {
+        el.textContent = '';
+      }
+    }
+    numBtns.forEach(function (b, k) {
+      var d = k + 1, left = 9 - counts[d];
+      b.innerHTML = d + '<small>' + (left > 0 ? left : '') + '</small>';
+      b.disabled = left <= 0 && !memo;
+    });
+    document.querySelectorAll('.levels button').forEach(function (b) {
+      b.classList.toggle('on', Number(b.dataset.level) === state.level);
+    });
+    document.getElementById('memoBtn').classList.toggle('on', memo);
+    padEl.classList.toggle('memo', memo);
+    document.getElementById('undoBtn').disabled = !history.length || state.done;
+    updateStats();
+  }
+
+  function updateStats() {
+    if (!state) return;
+    document.getElementById('timeLabel').textContent = fmtTime(currentElapsed());
+    document.getElementById('infoLabel').textContent = LEVEL_NAMES[state.level];
+  }
+  setInterval(updateStats, 500);
+
+  // ---------- イベント ----------
+  gridEl.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest('.cell');
+    if (!el) return;
+    sel = Number(el.dataset.i);
+    render();
+  });
+  numsEl.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (b) input(Number(b.dataset.d));
+  });
+  document.getElementById('undoBtn').addEventListener('click', undo);
+  document.getElementById('eraseBtn').addEventListener('click', erase);
+  document.getElementById('memoBtn').addEventListener('click', function () { memo = !memo; render(); });
+  document.getElementById('hintBtn').addEventListener('click', hint);
+  document.getElementById('newBtn').addEventListener('click', function () {
+    if (inProgress() && !confirm('今の問題をやめて、新しい問題にしますか？')) return;
+    newGame(state.level);
+  });
+  document.querySelectorAll('.levels button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var level = Number(b.dataset.level);
+      if (level === state.level && !state.done) return;
+      if (inProgress() && !confirm(LEVEL_NAMES[level] + 'の新しい問題にしますか？')) return;
+      newGame(level);
+    });
+  });
+  document.getElementById('againBtn').addEventListener('click', function () { newGame(state.level); });
+
+  // PC用のキーボード操作
+  document.addEventListener('keydown', function (e) {
+    if (!state) return;
+    var k = e.key;
+    if (k >= '1' && k <= '9') { input(Number(k)); return; }
+    if (k === 'Backspace' || k === 'Delete' || k === '0') { erase(); e.preventDefault(); return; }
+    if (k === 'm' || k === 'M') { memo = !memo; render(); return; }
+    if ((e.ctrlKey || e.metaKey) && k === 'z') { undo(); e.preventDefault(); return; }
+    var moves = { ArrowUp: -9, ArrowDown: 9, ArrowLeft: -1, ArrowRight: 1 };
+    if (moves[k] !== undefined) {
+      if (sel < 0) sel = 40;
+      else {
+        var r = Math.floor(sel / 9), c = sel % 9;
+        if (k === 'ArrowUp') r = (r + 8) % 9;
+        if (k === 'ArrowDown') r = (r + 1) % 9;
+        if (k === 'ArrowLeft') c = (c + 8) % 9;
+        if (k === 'ArrowRight') c = (c + 1) % 9;
+        sel = r * 9 + c;
+      }
+      e.preventDefault();
+      render();
+    }
+  });
+
+  window.addEventListener('resize', computeSize);
+  document.addEventListener('visibilitychange', function () {
+    // 裏に回っている間は時間を止める
+    if (document.hidden) { stopTimer(); save(); } else startTimer();
+  });
+
+  // ---------- 起動 ----------
+  buildDom();
+  var saved = storageGet(SAVE_KEY);
+  if (saved && saved.state && saved.state.solution && !saved.state.done) {
+    state = saved.state;
+    history = saved.history || [];
+    startTimer();
+    computeSize();
+  } else {
+    state = { level: saved && saved.state ? saved.state.level : 0, puzzle: [], solution: [], values: [], notes: [], elapsed: 0, hints: 0, done: false };
+    computeSize();
+    newGame(state.level);
+  }
+})();
+</script>
+</body>
+</html>
