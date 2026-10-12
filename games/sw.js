@@ -16,7 +16,8 @@
  */
 
 const CACHE_PREFIX = 'uniiqcode-games-';
-const CACHE_NAME = CACHE_PREFIX + 'v1';
+// v1→v2(2026年10月): メニュー(index.html)からトップへ戻るリンクを外した。
+const CACHE_NAME = CACHE_PREFIX + 'v2';
 
 const APP_SHELL = [
   './',

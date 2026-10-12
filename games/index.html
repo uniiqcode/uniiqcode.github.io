@@ -25,7 +25,8 @@
 
   【uniiqcode.github.io 公開用コピー】2026年10月、niisan-tvリポジトリの
   frontend/games/index.html を複製。変更点はパスの相対化、見出し下の表記、
-  トップへ戻るリンク、Service Workerを1つ(games/sw.js)にまとめたこと。
+  Service Workerを1つ(games/sw.js)にまとめたこと。
+  (トップへ戻るリンクは一度付けたが、niisanの指定で外した)
 
   ・各ゲームの保存データ(localStorage、同じサイト内なので読める)から、
     クリア回数・ベスト記録・遊びかけの有無を表示する。読むだけで書き換えはしない。
@@ -83,8 +84,6 @@
     border-radius: 999px; padding: 2px 8px; letter-spacing: 0.05em;
   }
   .arrow { flex: none; color: var(--sub); font-size: 22px; }
-  footer { max-width: 720px; margin: 28px auto 0; font-size: 13px; }
-  footer a { color: var(--sub); text-decoration: none; }
 </style>
 </head>
 <body>
@@ -95,8 +94,6 @@
 </header>
 
 <main class="list" id="list"></main>
-
-<footer><a href="../">‹ uniiqcode.github.io トップへ</a></footer>
 
 <script>
 (function () {
