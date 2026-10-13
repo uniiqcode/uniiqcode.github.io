@@ -14,17 +14,17 @@
 
 <!--
   【uniiqcode.github.io 公開用コピー】2026年10月、niisan-tvリポジトリの
-  frontend/solitaire/solitaire04.html を複製。変更点は[メニュー]のリンク先を相対パス(../)にしたことのみ。
+  frontend/solitaire/solitaire05.html を複製。変更点は[メニュー]のリンク先を相対パス(../)にしたことのみ。
   公開URL: https://uniiqcode.github.io/games/solitaire/
 
-  solitaire/solitaire04.html: スマホ向けソリティア(クロンダイク) 第4版
+  solitaire/solitaire05.html: スマホ向けソリティア(クロンダイク) 第5版
 
   ・2026年10月、solitaire/index.html を複製して保存した完成版。ゲームメニュー
     (games/index.html)からはこの版を開く。index.html は今後の改良版の作業場所。
-  ・第3版(solitaire03.html)からの変更: カード左上の数字を大きく(カード幅の30%→70%)し、
-    マークを数字の右に横並びにした。重なったカードの見える帯と3枚めくりの扇も広げた。
+  ・第4版(solitaire04.html)からの変更: 必ず全部完了できる「かんたん」を追加し、標準にした。
+    上のボタンは かんたん → 1枚めくり → 3枚めくり の順に切り替わる。
   ・保存データ(localStorage)のキー名は第1版から同じ solitaire01-* を使い、
-    途中経過・成績を引き継ぐ。
+    途中経過・成績を引き継ぐ(遊びかけのゲームは、めくる枚数に合わせて続く)。
 
   ・このファイル1枚で完結(外部JS/CSSなし、サーバーAPIなし)。
   ・操作: カードをタップすると自動で置ける場所へ移動(組札を優先)。
@@ -240,7 +240,7 @@
 
   // カードは {s: スート0-3, r: ランク1-13, up: 表向きか}。
   // カードのid = s*13 + (r-1)。DOM要素はidごとに1つ作って使い回す。
-  var state;          // {piles: {stock, waste, f0..f3, t0..t6}, draw, moves, elapsed, won}
+  var state;          // {piles: {stock, waste, f0..f3, t0..t6}, mode, draw, moves, elapsed, won}
   var history = [];   // 戻す用のスナップショット(JSON文字列)
   var els = {};       // id -> カード要素
   var slots = {};     // 山のキー -> 空き枠要素
@@ -260,8 +260,20 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 保存できない環境では無視 */ }
   }
 
-  // ---------- 新しいゲーム ----------
-  function newGame(draw) {
+  // ---------- 遊び方(モード) ----------
+  // 【2026年10月】「かんたん」を追加し、標準にした(niisan要望「お年寄りに全部完了させてあげたい」)。
+  // 上のボタンを押すたびに かんたん → 1枚めくり → 3枚めくり → かんたん… と切り替わる。
+  //   かんたん: 1枚めくり。配る前に、素直な手順(simplePlayWins)で最後まで解けるか試し、
+  //             解けた配りだけを出す。普通に打っていけば必ず全部完了できる。
+  //   1枚めくり・3枚めくり: これまでどおり、まったくランダムに配る(詰まることもある)。
+  var MODES = {
+    easy:  { label: 'かんたん',  draw: 1, next: 'draw1' },
+    draw1: { label: '1枚めくり', draw: 1, next: 'draw3' },
+    draw3: { label: '3枚めくり', draw: 3, next: 'easy' }
+  };
+  var DEFAULT_MODE = 'easy';
+
+  function dealRandom() {
     var deck = [];
     for (var s = 0; s < 4; s++) for (var r = 1; r <= 13; r++) deck.push({ s: s, r: r, up: false });
     for (var i = deck.length - 1; i > 0; i--) {
@@ -275,7 +287,71 @@
       top(piles[k]).up = true;
     });
     piles.stock = deck;
-    state = { piles: piles, draw: draw, moves: 0, elapsed: 0, won: false };
+    return piles;
+  }
+
+  // 人が普通に打つ素直な手順で、1枚めくりのまま最後まで解けるかを試す(配りは書き換えない)。
+  //   1) 組札に置けるカードは置く  2) 裏向きのカードがめくれる列の移動をする
+  //   3) めくり札を場に置く        4) それ以外は山札をめくる(山札を3周しても進まなければ諦める)
+  // ここで使う手はすべてゲームで打てる手なので、true になった配りは必ず全部完了できる。
+  // 1回の判定は0.1ミリ秒ほど。素直な手順で解ける配りは約4回に1回出る(2万回の試算)。
+  function simplePlayWins(piles) {
+    var p = JSON.parse(JSON.stringify(piles));
+    var f = [0, 0, 0, 0];
+    var red = function (c) { return c.s === 1 || c.s === 2; };
+    var toF = function (c) { return f[c.s] === c.r - 1; };
+    var toT = function (col, c) {
+      var t = col[col.length - 1];
+      return t ? (t.up && red(t) !== red(c) && t.r === c.r + 1) : c.r === 13;
+    };
+    var flip = function (col) { if (col.length && !col[col.length - 1].up) col[col.length - 1].up = true; };
+    var cols = TAB_KEYS.map(function (k) { return p[k]; });
+    var idle = 0;
+    for (var step = 0; step < 3000; step++) {
+      var moved = false, a, b, c, col;
+      for (a = 0; a < 7; a++) {
+        col = cols[a]; c = col[col.length - 1];
+        if (c && c.up && toF(c)) { f[c.s]++; col.pop(); flip(col); moved = true; }
+      }
+      var w = p.waste[p.waste.length - 1];
+      if (!moved && w && toF(w)) { f[w.s]++; p.waste.pop(); moved = true; }
+      for (a = 0; a < 7 && !moved; a++) {
+        col = cols[a];
+        var i = -1;
+        for (var k = 0; k < col.length; k++) if (col[k].up) { i = k; break; }
+        if (i < 0 || (i === 0 && col[0].r === 13)) continue;
+        for (b = 0; b < 7; b++) {
+          if (b === a || !toT(cols[b], col[i]) || (i === 0 && !cols[b].length)) continue;
+          Array.prototype.push.apply(cols[b], col.splice(i)); flip(col); moved = true; break;
+        }
+      }
+      if (!moved && w) {
+        for (b = 0; b < 7; b++) if (toT(cols[b], w)) { cols[b].push(p.waste.pop()); moved = true; break; }
+      }
+      if (f[0] + f[1] + f[2] + f[3] === 52) return true;
+      if (moved) { idle = 0; continue; }
+      if (p.stock.length) {
+        c = p.stock.pop(); c.up = true; p.waste.push(c);
+      } else if (p.waste.length) {
+        if (++idle > 2) return false;
+        p.stock = p.waste.reverse().map(function (x) { x.up = false; return x; });
+        p.waste = [];
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  // ---------- 新しいゲーム ----------
+  function newGame(mode) {
+    if (!MODES[mode]) mode = DEFAULT_MODE;
+    var piles = dealRandom();
+    if (mode === 'easy') {
+      // 解ける配りが出るまで配り直す(ふつうは数回、長くても数ミリ秒)
+      for (var tries = 0; tries < 5000 && !simplePlayWins(piles); tries++) piles = dealRandom();
+    }
+    state = { piles: piles, mode: mode, draw: MODES[mode].draw, moves: 0, elapsed: 0, won: false };
     history = [];
     timerStart = null;
     overlay.classList.remove('show');
@@ -291,6 +367,8 @@
     var saved = storageGet(SAVE_KEY);
     if (!saved || !saved.state || !saved.state.piles) return false;
     state = saved.state;
+    // 「かんたん」追加前の保存データには mode が無い。めくる枚数から決め、遊びかけはそのまま続ける
+    if (!MODES[state.mode]) state.mode = state.draw === 3 ? 'draw3' : 'draw1';
     state.elapsed = saved.elapsed || 0;
     history = saved.history || [];
     return true;
@@ -474,7 +552,7 @@
     if (isBest) stats.best = state.elapsed;
     storageSet(STATS_KEY, stats);
     document.getElementById('resultText').textContent =
-      '時間 ' + fmtTime(state.elapsed) + ' ・ ' + state.moves + '手';
+      MODES[state.mode].label + ' ・ 時間 ' + fmtTime(state.elapsed) + ' ・ ' + state.moves + '手';
     document.getElementById('recordText').textContent =
       (isBest ? 'ベスト記録！ ' : 'ベスト ' + fmtTime(stats.best) + ' ・ ') + 'クリア ' + stats.wins + '回';
     setTimeout(function () { overlay.classList.add('show'); }, 600);
@@ -602,7 +680,7 @@
     });
 
     undoBtn.disabled = !history.length || state.won;
-    drawBtn.textContent = state.draw === 3 ? '3枚めくり' : '1枚めくり';
+    drawBtn.textContent = MODES[state.mode].label;
     autoBtn.style.display = canAutoComplete() && !autoRunning ? 'block' : 'none';
     updateStats();
   }
@@ -686,17 +764,17 @@
   document.getElementById('newBtn').addEventListener('click', function () {
     if (autoRunning) return;
     if (inProgress() && !confirm('今のゲームをやめて、新しく始めますか？')) return;
-    newGame(state.draw);
+    newGame(state.mode);
   });
   undoBtn.addEventListener('click', undo);
   drawBtn.addEventListener('click', function () {
     if (autoRunning) return;
-    var next = state.draw === 1 ? 3 : 1;
-    if (inProgress() && !confirm(next + '枚めくりで新しく始めますか？')) return;
+    var next = MODES[state.mode].next;
+    if (inProgress() && !confirm('「' + MODES[next].label + '」で新しく始めますか？')) return;
     newGame(next);
   });
   autoBtn.addEventListener('click', autoComplete);
-  document.getElementById('againBtn').addEventListener('click', function () { newGame(state.draw); });
+  document.getElementById('againBtn').addEventListener('click', function () { newGame(state.mode); });
 
   window.addEventListener('resize', function () { computeLayout(); render(); });
   document.addEventListener('visibilitychange', function () {
@@ -711,9 +789,9 @@
   if (load()) {
     if (state.moves > 0 && !state.won) startTimer();
     render();
-    if (state.won) newGame(state.draw);
+    if (state.won) newGame(state.mode);
   } else {
-    newGame(1);
+    newGame(DEFAULT_MODE);
   }
 })();
 </script>
