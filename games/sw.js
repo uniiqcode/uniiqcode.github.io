@@ -17,7 +17,9 @@
 
 const CACHE_PREFIX = 'uniiqcode-games-';
 // v1→v2(2026年10月): メニュー(index.html)からトップへ戻るリンクを外した。
-const CACHE_NAME = CACHE_PREFIX + 'v2';
+// v2→v3(2026年10月): ソリティアを第4版(カードの数字を大きく)に更新し、
+// アイコンを新しい絵(ハートのエースと「ゲーム」)に差し替えた。
+const CACHE_NAME = CACHE_PREFIX + 'v3';
 
 const APP_SHELL = [
   './',

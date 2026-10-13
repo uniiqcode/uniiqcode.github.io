@@ -14,15 +14,15 @@
 
 <!--
   【uniiqcode.github.io 公開用コピー】2026年10月、niisan-tvリポジトリの
-  frontend/solitaire/solitaire03.html を複製。変更点は[メニュー]のリンク先を相対パス(../)にしたことのみ。
+  frontend/solitaire/solitaire04.html を複製。変更点は[メニュー]のリンク先を相対パス(../)にしたことのみ。
   公開URL: https://uniiqcode.github.io/games/solitaire/
 
-  solitaire/solitaire03.html: スマホ向けソリティア(クロンダイク) 第3版
+  solitaire/solitaire04.html: スマホ向けソリティア(クロンダイク) 第4版
 
   ・2026年10月、solitaire/index.html を複製して保存した完成版。ゲームメニュー
     (games/index.html)からはこの版を開く。index.html は今後の改良版の作業場所。
-  ・第2版(solitaire02.html)からの変更: メニューの最後に[メニュー](ゲームメニューへ
-    戻るリンク)を追加。幅の狭いスマホの縦向きでボタンの文字が折れないよう調整。
+  ・第3版(solitaire03.html)からの変更: カード左上の数字を大きく(カード幅の30%→70%)し、
+    マークを数字の右に横並びにした。重なったカードの見える帯と3枚めくりの扇も広げた。
   ・保存データ(localStorage)のキー名は第1版から同じ solitaire01-* を使い、
     途中経過・成績を引き継ぐ。
 
@@ -131,11 +131,22 @@
   }
   .card.red { color: var(--red); }
   .card.black { color: var(--black); }
+  /* 【2026年10月】カード左上の数字とマークを大きくし、横に並べた(niisan要望「A〜Kを
+     もっと大きく見やすく」)。以前は数字の下にマークを縦に並べていたが、場の列で
+     重なったカードではマークが隠れていた。横並びにすると、重なって見える上端の
+     帯の中に「10♥」のように両方が収まる。文字の大きさは render() でカード幅から決める。 */
   .card .corner {
-    position: absolute; left: 6%; top: 3%;
-    font-weight: 700; line-height: 1; text-align: center; letter-spacing: -0.05em;
+    position: absolute; left: 5%; top: 2%;
+    display: flex; align-items: baseline; white-space: nowrap;
+    font-weight: 800; line-height: 1;
   }
-  .card .corner span { display: block; }
+  .card .corner .rank { letter-spacing: -0.04em; }
+  .card .corner .rank.ten {
+    letter-spacing: -0.1em; display: inline-block; transform-origin: left center;
+    transform: scaleX(var(--ten-squeeze, 1));
+    margin-right: calc((var(--ten-squeeze, 1) - 1) * 0.95em);
+  }
+  .card .corner .suit { margin-left: 0.06em; }
   .card .pip {
     position: absolute; right: 7%; bottom: 5%; line-height: 1;
   }
@@ -210,6 +221,14 @@
   var STATS_KEY = 'solitaire01-stats-v1';
   var TAB_KEYS = ['t0', 't1', 't2', 't3', 't4', 't5', 't6'];
   var FOUND_KEYS = ['f0', 'f1', 'f2', 'f3'];
+
+  // カード左上の文字の大きさ(カード幅に対する割合)。重なったカードの見える帯の高さ・
+  // 3枚めくりの扇の幅は、この大きさから自動で決まる。
+  //   RANK_FRAC: 数字(A〜K)  SUIT_FRAC: マーク  TEN_SQUEEZE: 「10」だけ横幅を縮める割合(1=縮めない)
+  //   2026年10月: 46%と70%の試作を比べ、niisanの判断で70%に決定(「10」は横80%に縮めて収める)
+  var RANK_FRAC = 0.70;
+  var SUIT_FRAC = 0.44;
+  var TEN_SQUEEZE = 0.8;
 
   var board = document.getElementById('board');
   var autoBtn = document.getElementById('autoBtn');
@@ -474,9 +493,14 @@
     layout = {
       W: W, H: H, gap: gap, cw: cw, ch: ch, left: left,
       tabTop: gap * 2 + ch + Math.round(gap * 1.5),
-      fan: Math.round(cw * 0.3),
+      // 【2026年10月】数字を大きくしたのに合わせ、3枚めくりの扇の幅(0.3→0.5)と、
+      // 場の列で表向きカードが見える帯の高さ(0.27→0.34)を広げた。列が長くなって
+      // 画面に収まらない時は、従来どおり tableauOffsets() が自動で詰める。
+      // 扇は、下のカードの数字(「10」)が見える幅まで。ただし隣の組札の列には掛からない幅まで
+      fan: Math.round(Math.min(cw * (0.05 + RANK_FRAC), (cw + gap) / 2)),
       downOff: Math.round(ch * 0.11),
-      upOff: Math.round(ch * 0.27)
+      textStrip: Math.round(cw * RANK_FRAC * 0.78 + ch * 0.02),
+      upOff: Math.round(Math.max(ch * 0.34, cw * RANK_FRAC * 0.78 + ch * 0.06))
     };
   }
   function colX(i) { return layout.left + i * (layout.cw + layout.gap); }
@@ -496,7 +520,8 @@
     pile.forEach(function (c, i) { if (i < pile.length - 1) { if (c.up) nUp++; else nDown++; } });
     var avail = layout.H - layout.tabTop - layout.ch - layout.gap;
     var need = nDown * down + nUp * up;
-    if (need > avail && nUp > 0) up = Math.max(Math.round(layout.ch * 0.14), (avail - nDown * down) / nUp);
+    // 詰める時も、大きくした数字が隠れない幅(textStrip)までにとどめる(以前はカード高さの14%)
+    if (need > avail && nUp > 0) up = Math.max(layout.textStrip, (avail - nDown * down) / nUp);
     if (nDown * down + nUp * up > avail) {
       var scale = avail / (nDown * down + nUp * up);
       down *= scale; up *= scale;
@@ -520,8 +545,8 @@
         el.className = 'card ' + (isRed(c) ? 'red' : 'black');
         el.dataset.id = cardId(c);
         el.innerHTML =
-          '<div class="face"><div class="corner"><span>' + RANKS[r] + '</span><span>' + SUITS[s] +
-          '</span></div><div class="pip">' + SUITS[s] + '</div></div><div class="back"></div>';
+          '<div class="face"><div class="corner"><span class="rank' + (r === 10 ? ' ten' : '') + '">' + RANKS[r] +
+          '</span><span class="suit">' + SUITS[s] + '</span></div><div class="pip">' + SUITS[s] + '</div></div><div class="back"></div>';
         board.appendChild(el);
         els[cardId(c)] = el;
       }
@@ -541,8 +566,10 @@
       else s.textContent = '';
     });
 
-    var cornerSize = Math.round(L.cw * 0.3);
-    var pipSize = Math.round(L.cw * 0.5);
+    var rankSize = Math.round(L.cw * RANK_FRAC);
+    var suitSize = Math.round(L.cw * SUIT_FRAC);
+    board.style.setProperty('--ten-squeeze', TEN_SQUEEZE);
+    var pipSize = Math.round(L.cw * 0.55);
 
     Object.keys(state.piles).forEach(function (key) {
       var pile = state.piles[key];
@@ -562,8 +589,14 @@
         el.style.zIndex = (key.charAt(0) === 't' ? 100 : 10) + i;
         el.classList.toggle('up', !!c.up);
         el.classList.remove('dragging');
-        var corner = el.querySelector('.corner');
-        corner.style.fontSize = cornerSize + 'px';
+        // 長い列を詰めて見える帯が細くなった時は、重なっている表向きカードの数字だけ
+        // 帯に収まる大きさまで小さくする(一番下のカードはいつも通常の大きさ)
+        var rs = rankSize;
+        if (offs && c.up && i < pile.length - 1) {
+          rs = Math.min(rankSize, Math.floor((offs.up - L.ch * 0.02) / 0.78));  // 帯に収まる大きさ
+        }
+        el.querySelector('.rank').style.fontSize = rs + 'px';
+        el.querySelector('.suit').style.fontSize = Math.round(rs * suitSize / rankSize) + 'px';
         el.querySelector('.pip').style.fontSize = pipSize + 'px';
       });
     });

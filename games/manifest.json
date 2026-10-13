@@ -1,6 +1,6 @@
 {
-  "name": "シニアゲーム",
-  "short_name": "シニアゲーム",
+  "name": "ゲーム",
+  "short_name": "ゲーム",
   "description": "uniiqcode.github.io/games シニアゲーム(ソリティア・数独)",
   "id": "./",
   "start_url": "./",

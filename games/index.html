@@ -8,7 +8,9 @@
 <!-- ホーム画面追加用(PWA)。manifest・アイコン・Service Workerはすべてこのフォルダ
      (games/)の中に置き、相対パスで読む(GitHub Pagesのサブフォルダで動かすため)。
      scopeは games/ 全体なので、各ゲーム(solitaire/・sudoku/)もアプリの中で開き、
-     各ゲームの[メニュー]ボタンでここへ戻る。 -->
+     各ゲームの[メニュー]ボタンでここへ戻る。
+     アイコンはハートのエースのカード1枚と「ゲーム」の文字(2026年10月、niisanがChatGPTで生成)。
+     ブラウザのタブ用(favicon-16/32)は、小さくても分かるようカードの部分だけを切り出している。 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -16,7 +18,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="シニアゲーム">
+<!-- ホーム画面のアイコンの下に出る名前は「ゲーム」(2026年10月、niisan指定。アイコンの絵の文字に合わせた)。
+     ブラウザのタブ(<title>)と画面の見出しは「シニアゲーム」のまま。 -->
+<meta name="apple-mobile-web-app-title" content="ゲーム">
 <meta name="theme-color" content="#1B2430">
 
 <!--
