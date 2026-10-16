@@ -671,7 +671,9 @@
         // 帯に収まる大きさまで小さくする(一番下のカードはいつも通常の大きさ)
         var rs = rankSize;
         if (offs && c.up && i < pile.length - 1) {
-          rs = Math.min(rankSize, Math.floor((offs.up - L.ch * 0.02) / 0.78));  // 帯に収まる大きさ
+          // 0.95: 数字の高さ(約0.78)に「Q」の尻尾が下にはみ出す分を足した値。0.78だと詰めた時に
+          // 尻尾が次のカードに隠れ、Qが「O」に見えた(2026年10月修正)
+          rs = Math.min(rankSize, Math.floor((offs.up - L.ch * 0.02) / 0.95));  // 帯に収まる大きさ
         }
         el.querySelector('.rank').style.fontSize = rs + 'px';
         el.querySelector('.suit').style.fontSize = Math.round(rs * suitSize / rankSize) + 'px';

@@ -22,7 +22,8 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // v3→v4(2026年10月): ソリティアを第5版(必ず全部完了できる「かんたん」を追加)に更新。
 // v4→v5(2026年10月): アイコンを紫の背景・カード1枚・文字なしの絵に差し替えたため。
 // v5→v6(2026年10月): アイコンの背景をメニューと同じ紺色にし、見出しを「ゲーム」に戻したため。
-const CACHE_NAME = CACHE_PREFIX + 'v6';
+// v6→v7(2026年10月): フリーセル(freecell/)を追加したため。
+const CACHE_NAME = CACHE_PREFIX + 'v7';
 
 const APP_SHELL = [
   './',
@@ -35,6 +36,8 @@ const APP_SHELL = [
   'icons/favicon-16.png',
   'solitaire/',
   'solitaire/index.html',
+  'freecell/',
+  'freecell/index.html',
   'sudoku/',
   'sudoku/index.html',
 ];
