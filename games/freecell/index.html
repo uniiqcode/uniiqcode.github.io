@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>フリーセル</title>
+<meta name="theme-color" content="#1F4D3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="フリーセル">
+<!-- faviconはSVGをその場で埋め込んでいる(ソリティア・数独と同じやり方) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='10' y='4' width='44' height='56' rx='6' fill='%23fff' stroke='%23333' stroke-width='2'/%3E%3Ctext x='32' y='44' font-size='30' text-anchor='middle' fill='%231b1b1b'%3E%E2%99%A3%3C/text%3E%3C/svg%3E">
+
+<!--
+  games/freecell/index.html: スマホ向けフリーセル
+  公開URL: https://uniiqcode.github.io/games/freecell/
+
+  ・2026年10月、niisanの依頼で追加。見た目・操作・保存のしかたは、ソリティア
+    (games/solitaire/index.html の第5版)をそのまま踏襲している(カードの見た目、上のボタン、
+    横向き時の左端メニュー、[メニュー]ボタン、戻す、自動保存、クリア画面)。
+  ・このファイル1枚で完結(外部JS/CSSなし、サーバーAPIなし)。
+  ・ルール: 52枚すべてを表向きで8列に配る。左上の4つの空き場所(フリーセル)には1枚ずつ
+    置ける。場の列には、色違いで1つ小さい数字を重ねる。空いた列にはどのカードでも置ける。
+    右上の組札に、マークごとにA→Kの順に積めばクリア。
+  ・複数枚の移動: 色違いで順に並んだカードは、空き場所と空いた列の数に応じた枚数まで
+    まとめて動かせる(通常のフリーセルと同じ。(空き場所+1)×2^(空いた列) 枚)。
+  ・お年寄り向けの工夫: もう場で使わないカード(相手の色の組札が追いついているカード)は、
+    手を打つたびに自動で組札へ移る。「戻す」は、その自動の移動も含めて1手ずつ戻す。
+  ・操作: カードをタップすると自動で置ける場所へ移動(組札→置ける列→空いた列→空き場所の順)。
+    ドラッグ&ドロップでも移動できる。
+  ・場の列がすべて大きい順に並ぶと「自動完成」ボタンが出る。
+-->
+<style>
+  :root {
+    --felt: #1F4D3A;
+    --felt-dark: #173B2C;
+    --bar: rgba(0, 0, 0, 0.28);
+    --slot: rgba(255, 255, 255, 0.22);
+    --text: #F3F1E8;
+    --red: #C62828;
+    --black: #1B1B1B;
+    --card: #FFFDF7;
+    --back1: #2F5FA8;
+    --back2: #244B86;
+    --hint: #FFD54F;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 30%, var(--felt), var(--felt-dark));
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+  }
+  body {
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* ---- 上部バー ---- */
+  .bar {
+    flex: none; display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px; background: var(--bar);
+  }
+  /* 【2026年10月】[メニュー]はゲームメニュー(games/index.html)へ戻るリンク。
+     見た目はボタンと同じにしている。途中経過は自動保存されるので確認は出さない。 */
+  .bar button, .bar .menu-link {
+    font: inherit; font-size: 14px; color: var(--text);
+    background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px; padding: 6px 8px; min-height: 34px;
+  }
+  .bar .menu-link { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+  .bar button:active, .bar .menu-link:active { background: rgba(255, 255, 255, 0.28); }
+  .bar button:disabled { opacity: 0.4; }
+  .bar .stats {
+    margin-left: auto; font-size: 13px; text-align: right; line-height: 1.25;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+
+  /* 幅の狭いスマホ(iPhone SE初代など幅320px級)の縦向きでは、ボタンの文字が
+     2行に折れないよう、文字と余白を少し小さくする */
+  .bar button, .levels button, .bar .menu-link { white-space: nowrap; }
+  @media (orientation: portrait) and (max-width: 380px) {
+    .bar { gap: 4px; padding: 8px 6px; }
+    .levels { gap: 4px; }
+    .bar button, .levels button, .bar .menu-link { font-size: 12px; padding: 6px 6px; }
+  }
+
+  /* 【2026年10月】横向きの時は、メニューを左端に縦に並べる(niisan要望)。
+     上段のバーの高さ分を盤面に回し、カードを少しでも大きく見せるため。
+     カードの大きさは画面の高さで決まるので、横向きでは高さが効く。 */
+  @media (orientation: landscape) {
+    body { flex-direction: row; }
+    .bar {
+      flex-direction: column; align-items: stretch; justify-content: flex-start;
+      gap: 8px; padding: 10px 8px; width: 92px;
+    }
+    .bar button, .bar .menu-link { padding: 8px 4px; min-height: 44px; font-size: 13px; }
+    .bar .stats { margin-left: 0; margin-top: auto; text-align: center; font-size: 14px; }
+  }
+
+  /* ---- 盤面 ---- */
+  #board { position: relative; flex: 1; touch-action: none; overflow: hidden; }
+  .slot {
+    position: absolute; border: 2px solid var(--slot); border-radius: 8%/6%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--slot); font-weight: bold;
+  }
+  .card {
+    position: absolute; left: 0; top: 0;
+    border-radius: 8%/6%;
+    transition: transform 0.18s ease;
+    will-change: transform;
+  }
+  .card.dragging { transition: none; }
+  .card .face, .card .back {
+    position: absolute; inset: 0; border-radius: inherit;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  }
+  .card .face { background: var(--card); display: none; overflow: hidden; }
+  .card.up .face { display: block; }
+  .card.up .back { display: none; }
+  .card .back {
+    background:
+      repeating-linear-gradient(45deg, var(--back1) 0 4px, var(--back2) 4px 8px);
+    border: 3px solid #fff;
+  }
+  .card.red { color: var(--red); }
+  .card.black { color: var(--black); }
+  /* 【2026年10月】カード左上の数字とマークを大きくし、横に並べた(niisan要望「A〜Kを
+     もっと大きく見やすく」)。以前は数字の下にマークを縦に並べていたが、場の列で
+     重なったカードではマークが隠れていた。横並びにすると、重なって見える上端の
+     帯の中に「10♥」のように両方が収まる。文字の大きさは render() でカード幅から決める。 */
+  .card .corner {
+    position: absolute; left: 5%; top: 2%;
+    display: flex; align-items: baseline; white-space: nowrap;
+    font-weight: 800; line-height: 1;
+  }
+  .card .corner .rank { letter-spacing: -0.04em; }
+  .card .corner .rank.ten {
+    letter-spacing: -0.1em; display: inline-block; transform-origin: left center;
+    transform: scaleX(var(--ten-squeeze, 1));
+    margin-right: calc((var(--ten-squeeze, 1) - 1) * 0.95em);
+  }
+  .card .corner .suit { margin-left: 0.06em; }
+  .card .pip {
+    position: absolute; right: 7%; bottom: 5%; line-height: 1;
+  }
+  /* フリーセル(空き場所)の枠は点線にして、組札の枠と見分けやすくする */
+  .slot.cell { border-style: dashed; }
+  .card.hint .face { box-shadow: 0 0 0 3px var(--hint), 0 1px 2px rgba(0, 0, 0, 0.45); }
+  .card.shake { animation: shake 0.3s; }
+  @keyframes shake {
+    0%, 100% { margin-left: 0; }
+    25% { margin-left: -5px; }
+    75% { margin-left: 5px; }
+  }
+
+  /* ---- 自動完成ボタン・クリア画面 ---- */
+  #autoBtn {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    font: inherit; font-size: 16px; font-weight: bold; color: #222;
+    background: var(--hint); border: none; border-radius: 999px;
+    padding: 12px 24px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    z-index: 2000; display: none;
+  }
+  #overlay {
+    position: fixed; inset: 0; z-index: 3000; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+  }
+  #overlay.show { display: flex; }
+  .dialog {
+    background: #FFFDF7; color: #222; border-radius: 16px;
+    padding: 24px 28px; text-align: center; min-width: 240px; max-width: calc(100vw - 32px);
+  }
+  .dialog h2 { margin: 0 0 12px; font-size: 24px; }
+  .dialog p { margin: 4px 0; font-size: 15px; }
+  .dialog button {
+    margin-top: 16px; font: inherit; font-size: 16px; font-weight: bold;
+    color: #fff; background: var(--felt); border: none; border-radius: 10px;
+    padding: 10px 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <button id="newBtn">新しく</button>
+  <button id="undoBtn">戻す</button>
+  <div class="stats">
+    <div id="timeLabel">0:00</div>
+    <div id="movesLabel">0手</div>
+  </div>
+  <a class="menu-link" href="../">メニュー</a>
+</div>
+
+<div id="board">
+  <button id="autoBtn">自動完成</button>
+</div>
+
+<div id="overlay">
+  <div class="dialog">
+    <h2>クリア！</h2>
+    <p id="resultText"></p>
+    <p id="recordText"></p>
+    <button id="againBtn">もう一度</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUITS = ['♠', '♥', '♦', '♣'];
+  var RANKS = ['', 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  var SAVE_KEY = 'freecell-state-v1';
+  var STATS_KEY = 'freecell-stats-v1';
+  var CELL_KEYS = ['c0', 'c1', 'c2', 'c3'];
+  var FOUND_KEYS = ['f0', 'f1', 'f2', 'f3'];
+  var TAB_KEYS = ['t0', 't1', 't2', 't3', 't4', 't5', 't6', 't7'];
+  var NCOL = 8;
+
+  // カード左上の文字の大きさ(カード幅に対する割合)。ソリティアと同じ値。
+  var RANK_FRAC = 0.70;
+  var SUIT_FRAC = 0.44;
+  var TEN_SQUEEZE = 0.8;
+
+  var board = document.getElementById('board');
+  var autoBtn = document.getElementById('autoBtn');
+  var undoBtn = document.getElementById('undoBtn');
+  var timeLabel = document.getElementById('timeLabel');
+  var movesLabel = document.getElementById('movesLabel');
+  var overlay = document.getElementById('overlay');
+
+  // カードは {s: スート0-3, r: ランク1-13}。フリーセルでは全部表向き。
+  // カードのid = s*13 + (r-1)。DOM要素はidごとに1つ作って使い回す。
+  var state;          // {piles: {c0..c3, f0..f3, t0..t7}, moves, elapsed, won}
+  var history = [];   // 戻す用のスナップショット(JSON文字列)
+  var els = {};
+  var slots = {};
+  var layout = {};
+  var pos = {};
+  var timerStart = null;
+  var autoRunning = false;
+
+  function isRed(c) { return c.s === 1 || c.s === 2; }
+  function cardId(c) { return c.s * 13 + c.r - 1; }
+  function top(pile) { return pile[pile.length - 1]; }
+  function kind(key) { return key.charAt(0); }   // 'c'=空き場所 'f'=組札 't'=場の列
+
+  function storageGet(key) {
+    try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
+  }
+  function storageSet(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 保存できない環境では無視 */ }
+  }
+
+  // ---------- 新しいゲーム ----------
+  function newGame() {
+    var deck = [];
+    for (var s = 0; s < 4; s++) for (var r = 1; r <= 13; r++) deck.push({ s: s, r: r });
+    for (var i = deck.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = deck[i]; deck[i] = deck[j]; deck[j] = t;
+    }
+    var piles = {};
+    CELL_KEYS.concat(FOUND_KEYS, TAB_KEYS).forEach(function (k) { piles[k] = []; });
+    deck.forEach(function (c, n) { piles[TAB_KEYS[n % NCOL]].push(c); });   // 7,7,7,7,6,6,6,6枚
+    state = { piles: piles, moves: 0, elapsed: 0, won: false };
+    history = [];
+    timerStart = null;
+    overlay.classList.remove('show');
+    // 配った時点で組札へ行けるA(列の一番下にあるもの)は自動で移す
+    autoToFoundation();
+    save();
+    render();
+  }
+
+  function save() {
+    storageSet(SAVE_KEY, { state: state, history: history.slice(-200), elapsed: currentElapsed() });
+  }
+
+  function load() {
+    var saved = storageGet(SAVE_KEY);
+    if (!saved || !saved.state || !saved.state.piles) return false;
+    state = saved.state;
+    state.elapsed = saved.elapsed || 0;
+    history = saved.history || [];
+    return true;
+  }
+
+  // ---------- 時間 ----------
+  function currentElapsed() {
+    if (!state) return 0;
+    return state.elapsed + (timerStart ? Date.now() - timerStart : 0);
+  }
+  function startTimer() {
+    if (!timerStart && !state.won) timerStart = Date.now();
+  }
+  function stopTimer() {
+    state.elapsed = currentElapsed();
+    timerStart = null;
+  }
+  function fmtTime(ms) {
+    var sec = Math.floor(ms / 1000);
+    return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2);
+  }
+  function updateStats() {
+    timeLabel.textContent = fmtTime(currentElapsed());
+    movesLabel.textContent = state.moves + '手';
+  }
+  setInterval(function () { if (state) updateStats(); }, 500);
+
+  // ---------- ルール ----------
+  function canPlaceOnTableau(card, key) {
+    var t = top(state.piles[key]);
+    if (!t) return true;
+    return isRed(t) !== isRed(card) && t.r === card.r + 1;
+  }
+  function canPlaceOnFoundation(card, key) {
+    var t = top(state.piles[key]);
+    if (!t) return card.r === 1;
+    return t.s === card.s && t.r === card.r - 1;
+  }
+  // idx から下が、色違いで1つずつ小さく並んでいるか
+  function isRun(pile, idx) {
+    for (var i = idx; i < pile.length - 1; i++) {
+      if (isRed(pile[i]) === isRed(pile[i + 1]) || pile[i].r !== pile[i + 1].r + 1) return false;
+    }
+    return true;
+  }
+  // 一度に動かせる枚数: (空き場所の数+1) × 2^(空いた列の数)。行き先が空いた列なら、その列は数えない
+  function maxMove(toKey) {
+    var cells = CELL_KEYS.filter(function (k) { return !state.piles[k].length; }).length;
+    var cols = TAB_KEYS.filter(function (k) { return k !== toKey && !state.piles[k].length; }).length;
+    return (cells + 1) * Math.pow(2, cols);
+  }
+  function canDrop(fromKey, idx, toKey) {
+    if (fromKey === toKey) return false;
+    var cards = state.piles[fromKey].slice(idx);
+    if (kind(toKey) === 'f') return cards.length === 1 && canPlaceOnFoundation(cards[0], toKey);
+    if (kind(toKey) === 'c') return cards.length === 1 && !state.piles[toKey].length;
+    return canPlaceOnTableau(cards[0], toKey) && cards.length <= maxMove(toKey);
+  }
+
+  // 持ち上げてよいカードか(idxから下をまとめて動かす)
+  function isMovable(key, idx) {
+    var pile = state.piles[key];
+    if (kind(key) !== 't') return idx === pile.length - 1;
+    return isRun(pile, idx);
+  }
+
+  function locate(id) {
+    for (var key in state.piles) {
+      var pile = state.piles[key];
+      for (var i = 0; i < pile.length; i++) if (cardId(pile[i]) === id) return { key: key, idx: i };
+    }
+    return null;
+  }
+
+  // もう場で使わないカードか(組札へ自動で移してよいか)。
+  // A・2はいつでも。3以上は、相手の色の2つの組札が、そのカードの1つ下まで積まれていれば
+  // (その上に重ねたいカードがもう場に無いので)移して困ることはない。
+  function isSafeToFoundation(card) {
+    if (card.r <= 2) return true;
+    var need = card.r - 1, ok = 0;
+    FOUND_KEYS.forEach(function (k) {
+      var t = top(state.piles[k]);
+      if (t && isRed(t) !== isRed(card) && t.r >= need) ok++;
+    });
+    return ok >= 2;
+  }
+  function autoToFoundation() {
+    var moved = true, count = 0;
+    while (moved) {
+      moved = false;
+      CELL_KEYS.concat(TAB_KEYS).forEach(function (k) {
+        var c = top(state.piles[k]);
+        if (!c || !isSafeToFoundation(c)) return;
+        for (var i = 0; i < 4; i++) {
+          if (canPlaceOnFoundation(c, FOUND_KEYS[i])) {
+            state.piles[FOUND_KEYS[i]].push(state.piles[k].pop());
+            moved = true; count++;
+            return;
+          }
+        }
+      });
+    }
+    return count;
+  }
+
+  // ---------- 操作 ----------
+  function snapshot() {
+    history.push(JSON.stringify({ piles: state.piles, moves: state.moves }));
+    if (history.length > 500) history.shift();
+  }
+
+  function moveCards(fromKey, idx, toKey, noAuto) {
+    snapshot();
+    var cards = state.piles[fromKey].splice(idx);
+    Array.prototype.push.apply(state.piles[toKey], cards);
+    state.moves++;
+    startTimer();
+    if (!noAuto) autoToFoundation();
+    afterMove();
+  }
+
+  function undo() {
+    if (!history.length || autoRunning || state.won) return;
+    var prev = JSON.parse(history.pop());
+    state.piles = prev.piles;
+    state.moves = prev.moves;
+    afterMove();
+  }
+
+  function afterMove() {
+    var won = FOUND_KEYS.every(function (k) { return state.piles[k].length === 13; });
+    if (won && !state.won) {
+      state.won = true;
+      stopTimer();
+      recordWin();
+    }
+    save();
+    render();
+  }
+
+  function shake(card) {
+    var el = els[cardId(card)];
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+  }
+
+  // タップされたカードを置ける場所を探して動かす(組札→置ける列→空いた列→空き場所)
+  function tapCard(key, idx) {
+    var pile = state.piles[key];
+    var card = pile[idx];
+    if (!isMovable(key, idx)) { shake(card); return; }
+    var single = idx === pile.length - 1;
+    var i, k;
+
+    if (single && kind(key) !== 'f') {
+      for (i = 0; i < 4; i++) if (canDrop(key, idx, FOUND_KEYS[i])) { moveCards(key, idx, FOUND_KEYS[i]); return; }
+    }
+    // 場の列: 移動元の右隣から順に探す。空いた列は、列の一番下からの移動では使わない(意味がないため)
+    var start = kind(key) === 't' ? TAB_KEYS.indexOf(key) + 1 : 0;
+    var emptyTarget = null;
+    for (i = 0; i < NCOL; i++) {
+      k = TAB_KEYS[(start + i) % NCOL];
+      if (!canDrop(key, idx, k)) continue;
+      if (state.piles[k].length) { moveCards(key, idx, k); return; }
+      if (!emptyTarget && !(kind(key) === 't' && idx === 0)) emptyTarget = k;
+    }
+    if (emptyTarget) { moveCards(key, idx, emptyTarget); return; }
+    // 1枚なら空き場所へ(空き場所にあるカード自身は除く)
+    if (single && kind(key) === 't') {
+      for (i = 0; i < 4; i++) if (canDrop(key, idx, CELL_KEYS[i])) { moveCards(key, idx, CELL_KEYS[i]); return; }
+    }
+    shake(card);
+  }
+
+  // ---------- 自動完成 ----------
+  // 場の列がすべて大きい順(上から下へ数字が小さくなる)に並べば、あとは組札へ送るだけで終わる
+  function canAutoComplete() {
+    if (state.won) return false;
+    return TAB_KEYS.every(function (k) {
+      var p = state.piles[k];
+      for (var i = 0; i < p.length - 1; i++) if (p[i].r <= p[i + 1].r) return false;
+      return true;
+    });
+  }
+
+  function autoComplete() {
+    if (autoRunning) return;
+    autoRunning = true;
+    autoBtn.style.display = 'none';
+    (function step() {
+      if (state.won) { autoRunning = false; return; }
+      // 一番小さい数字のカードから組札へ
+      var best = null;
+      CELL_KEYS.concat(TAB_KEYS).forEach(function (k) {
+        var c = top(state.piles[k]);
+        if (!c) return;
+        FOUND_KEYS.forEach(function (f) {
+          if (canPlaceOnFoundation(c, f) && (!best || c.r < best.r)) best = { key: k, f: f, r: c.r };
+        });
+      });
+      if (!best) { autoRunning = false; render(); return; }
+      moveCards(best.key, state.piles[best.key].length - 1, best.f, true);
+      setTimeout(step, 90);
+    })();
+  }
+
+  // ---------- 成績 ----------
+  function recordWin() {
+    var stats = storageGet(STATS_KEY) || { wins: 0, best: null };
+    stats.wins++;
+    var isBest = stats.best === null || state.elapsed < stats.best;
+    if (isBest) stats.best = state.elapsed;
+    storageSet(STATS_KEY, stats);
+    document.getElementById('resultText').textContent =
+      'フリーセル ・ 時間 ' + fmtTime(state.elapsed) + ' ・ ' + state.moves + '手';
+    document.getElementById('recordText').textContent =
+      (isBest ? 'ベスト記録！ ' : 'ベスト ' + fmtTime(stats.best) + ' ・ ') + 'クリア ' + stats.wins + '回';
+    setTimeout(function () { overlay.classList.add('show'); }, 600);
+  }
+
+  // ---------- 寸法 ----------
+  function computeLayout() {
+    var W = board.clientWidth, H = board.clientHeight;
+    var gap = Math.max(4, Math.round(W * 0.012));
+    var cw = (W - gap * (NCOL + 1)) / NCOL;
+    // 横向きなど高さが足りない時は、高さに合わせてカードを小さくする
+    cw = Math.min(cw, (H - gap * 3) / 1.4 / 3.2);
+    cw = Math.floor(cw);
+    var ch = Math.round(cw * 1.4);
+    var left = Math.round((W - (cw * NCOL + gap * (NCOL - 1))) / 2);
+    layout = {
+      W: W, H: H, gap: gap, cw: cw, ch: ch, left: left,
+      tabTop: gap * 2 + ch + Math.round(gap * 1.5),
+      // 重なったカードの見える帯は、大きな数字が収まる高さ(ソリティアと同じ決め方)
+      textStrip: Math.round(cw * RANK_FRAC * 0.78 + ch * 0.02),
+      upOff: Math.round(Math.max(ch * 0.34, cw * RANK_FRAC * 0.78 + ch * 0.06))
+    };
+  }
+  function colX(i) { return layout.left + i * (layout.cw + layout.gap); }
+
+  function slotPos(key) {
+    var n = Number(key.charAt(1)), y = layout.gap;
+    if (kind(key) === 'c') return { x: colX(n), y: y };
+    if (kind(key) === 'f') return { x: colX(4 + n), y: y };
+    return { x: colX(n), y: layout.tabTop };
+  }
+
+  // 列が画面に収まらない時は、重なり幅を詰める(数字が隠れない幅までを優先)
+  function tableauOffset(pile) {
+    var up = layout.upOff, n = pile.length - 1;
+    if (n <= 0) return up;
+    var avail = layout.H - layout.tabTop - layout.ch - layout.gap;
+    if (n * up > avail) up = Math.max(avail / n, Math.min(up, layout.textStrip));
+    if (n * up > avail) up = avail / n;
+    return up;
+  }
+
+  // ---------- 描画 ----------
+  function buildDom() {
+    CELL_KEYS.concat(FOUND_KEYS, TAB_KEYS).forEach(function (key) {
+      var s = document.createElement('div');
+      s.className = 'slot' + (kind(key) === 'c' ? ' cell' : '');
+      s.dataset.key = key;
+      board.appendChild(s);
+      slots[key] = s;
+    });
+    for (var s = 0; s < 4; s++) {
+      for (var r = 1; r <= 13; r++) {
+        var el = document.createElement('div');
+        var c = { s: s, r: r };
+        el.className = 'card up ' + (isRed(c) ? 'red' : 'black');
+        el.dataset.id = cardId(c);
+        el.innerHTML =
+          '<div class="face"><div class="corner"><span class="rank' + (r === 10 ? ' ten' : '') + '">' + RANKS[r] +
+          '</span><span class="suit">' + SUITS[s] + '</span></div><div class="pip">' + SUITS[s] + '</div></div><div class="back"></div>';
+        board.appendChild(el);
+        els[cardId(c)] = el;
+      }
+    }
+  }
+
+  function render() {
+    var L = layout;
+    Object.keys(slots).forEach(function (key) {
+      var p = slotPos(key), s = slots[key];
+      s.style.left = p.x + 'px'; s.style.top = p.y + 'px';
+      s.style.width = L.cw + 'px'; s.style.height = L.ch + 'px';
+      s.style.fontSize = Math.round(L.cw * 0.4) + 'px';
+      s.textContent = kind(key) === 'f' ? 'A' : '';
+    });
+
+    var rankSize = Math.round(L.cw * RANK_FRAC);
+    var suitSize = Math.round(L.cw * SUIT_FRAC);
+    board.style.setProperty('--ten-squeeze', TEN_SQUEEZE);
+    var pipSize = Math.round(L.cw * 0.55);
+
+    Object.keys(state.piles).forEach(function (key) {
+      var pile = state.piles[key];
+      var base = slotPos(key);
+      var off = kind(key) === 't' ? tableauOffset(pile) : 0;
+      pile.forEach(function (c, i) {
+        var id = cardId(c), el = els[id];
+        var x = base.x, y = base.y + i * off;
+        pos[id] = { x: x, y: y };
+        el.style.width = L.cw + 'px';
+        el.style.height = L.ch + 'px';
+        el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+        el.style.zIndex = (kind(key) === 't' ? 100 : 10) + i;
+        el.classList.remove('dragging');
+        // 長い列を詰めて見える帯が細くなった時は、重なっているカードの数字だけ帯に収まる大きさにする
+        var rs = rankSize;
+        // 0.95: 数字の高さ(約0.78)に「Q」の尻尾が下にはみ出す分を足した値。0.78だと詰めた時に
+        // 尻尾が次のカードに隠れ、Qが「O」に見えた(2026年10月修正)
+        if (off && i < pile.length - 1) rs = Math.min(rankSize, Math.floor((off - L.ch * 0.02) / 0.95));
+        el.querySelector('.rank').style.fontSize = rs + 'px';
+        el.querySelector('.suit').style.fontSize = Math.round(rs * suitSize / rankSize) + 'px';
+        el.querySelector('.pip').style.fontSize = pipSize + 'px';
+      });
+    });
+
+    undoBtn.disabled = !history.length || state.won;
+    autoBtn.style.display = canAutoComplete() && !autoRunning ? 'block' : 'none';
+    updateStats();
+  }
+
+  // ---------- タッチ・ドラッグ ----------
+  var drag = null;
+
+  function pileAtPoint(x, y) {
+    var keys = CELL_KEYS.concat(FOUND_KEYS, TAB_KEYS);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i], b = slotPos(key);
+      var bottom = b.y + layout.ch;
+      if (kind(key) === 't') bottom = layout.H;   // 列の下の余白にも落とせる
+      if (x >= b.x - layout.gap / 2 && x <= b.x + layout.cw + layout.gap / 2 && y >= b.y - layout.gap && y <= bottom) return key;
+    }
+    return null;
+  }
+
+  function boardPoint(e) {
+    var r = board.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  board.addEventListener('pointerdown', function (e) {
+    if (drag || autoRunning || state.won) return;
+    if (e.target === autoBtn) return;
+    var cardEl = e.target.closest('.card');
+    if (!cardEl) return;
+    var loc = locate(Number(cardEl.dataset.id));
+    if (!loc) return;
+    drag = { key: loc.key, idx: loc.idx, start: boardPoint(e), moved: false, ids: [], pointerId: e.pointerId };
+    if (isMovable(loc.key, loc.idx)) drag.ids = state.piles[loc.key].slice(loc.idx).map(cardId);
+    try { board.setPointerCapture(e.pointerId); } catch (err) { /* 古いブラウザ向け */ }
+    e.preventDefault();
+  });
+
+  board.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    var p = boardPoint(e);
+    var dx = p.x - drag.start.x, dy = p.y - drag.start.y;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 8) return;
+    if (!drag.ids.length) return;
+    drag.moved = true;
+    drag.ids.forEach(function (id, k) {
+      var el = els[id], o = pos[id];
+      el.classList.add('dragging');
+      el.style.zIndex = 1000 + k;
+      el.style.transform = 'translate(' + (o.x + dx) + 'px,' + (o.y + dy) + 'px)';
+    });
+    drag.dx = dx; drag.dy = dy;
+  });
+
+  function endDrag(e, cancelled) {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    var d = drag;
+    drag = null;
+    if (cancelled) { render(); return; }
+    if (!d.moved) { tapCard(d.key, d.idx); return; }
+    // 持っているカードの上端中央あたりで落とし先を判定
+    var o = pos[d.ids[0]];
+    var cx = o.x + d.dx + layout.cw / 2, cy = o.y + d.dy + layout.ch * 0.3;
+    var target = pileAtPoint(cx, cy);
+    if (target && canDrop(d.key, d.idx, target)) moveCards(d.key, d.idx, target);
+    else render();
+  }
+  board.addEventListener('pointerup', function (e) { endDrag(e, false); });
+  board.addEventListener('pointercancel', function (e) { endDrag(e, true); });
+
+  // ---------- ボタン ----------
+  function inProgress() { return state.moves > 0 && !state.won; }
+
+  document.getElementById('newBtn').addEventListener('click', function () {
+    if (autoRunning) return;
+    if (inProgress() && !confirm('今のゲームをやめて、新しく始めますか？')) return;
+    newGame();
+  });
+  undoBtn.addEventListener('click', undo);
+  autoBtn.addEventListener('click', autoComplete);
+  document.getElementById('againBtn').addEventListener('click', function () { newGame(); });
+
+  window.addEventListener('resize', function () { computeLayout(); render(); });
+  document.addEventListener('visibilitychange', function () {
+    // 裏に回っている間は時間を止める
+    if (document.hidden) { if (timerStart) { stopTimer(); save(); } }
+    else if (state.moves > 0) startTimer();
+  });
+
+  // ---------- 起動 ----------
+  buildDom();
+  computeLayout();
+  if (load()) {
+    if (state.moves > 0 && !state.won) startTimer();
+    render();
+    if (state.won) newGame();
+  } else {
+    newGame();
+  }
+})();
+</script>
+</body>
+</html>
