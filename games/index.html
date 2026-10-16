@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>シニアゲーム</title>
+<title>ゲーム</title>
 
 <!-- ホーム画面追加用(PWA)。manifest・アイコン・Service Workerはすべてこのフォルダ
      (games/)の中に置き、相対パスで読む(GitHub Pagesのサブフォルダで動かすため)。
      scopeは games/ 全体なので、各ゲーム(solitaire/・sudoku/)もアプリの中で開き、
      各ゲームの[メニュー]ボタンでここへ戻る。
-     アイコンは、落ち着いた紫(古希・喜寿のお祝いの色)の背景に、少し傾けたハートのエースの
-     カード1枚(2026年10月、niisanがChatGPTで生成)。名前はアイコンの下に「ゲーム」と出るため、
-     絵の中に文字は入れていない。ブラウザのタブ用(favicon-16/32)は、カードの部分だけを切り出している。 -->
+     アイコンは、メニューと同じ紺色(#1B2430)の背景に、少し傾けたハートのエースのカード1枚
+     (2026年10月、niisanがChatGPTで生成した絵の背景と影を紺色に置き換えたもの)。名前はアイコンの
+     下に「ゲーム」と出るため、絵の中に文字は入れていない。ブラウザのタブ用(favicon-16/32)は、
+     カードの部分だけを切り出している。 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -19,13 +20,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<!-- ホーム画面のアイコンの下に出る名前は「ゲーム」(2026年10月、niisan指定。アイコンの絵の文字に合わせた)。
-     ブラウザのタブ(<title>)と画面の見出しは「シニアゲーム」のまま。 -->
+<!-- 名前は、ホーム画面のアイコンの下・ブラウザのタブ・画面の見出しとも「ゲーム」
+     (2026年10月、niisan指定。一時「シニアゲーム」としていたが戻した)。 -->
 <meta name="apple-mobile-web-app-title" content="ゲーム">
 <meta name="theme-color" content="#1B2430">
 
 <!--
-  games/index.html: シニアゲーム(ゲームメニュー)
+  games/index.html: ゲーム(ゲームメニュー)
   公開URL: https://uniiqcode.github.io/games/
 
   【uniiqcode.github.io 公開用コピー】2026年10月、niisan-tvリポジトリの
@@ -94,7 +95,7 @@
 <body>
 
 <header>
-  <h1>シニアゲーム</h1>
+  <h1>ゲーム</h1>
   <p>uniiqcode.github.io/games</p>
 </header>
 
