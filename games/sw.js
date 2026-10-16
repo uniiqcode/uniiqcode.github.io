@@ -1,5 +1,5 @@
 /**
- * uniiqcode.github.io/games/ - シニアゲーム用 Service Worker
+ * uniiqcode.github.io/games/ - ゲームメニュー用 Service Worker
  * -----------------------------------------------------------------------
  * 置き場所: games/sw.js。範囲(スコープ)は games/ 全体で、メニュー
  * (games/index.html)とゲーム(games/solitaire/・games/sudoku/)をまとめて扱う。
@@ -21,7 +21,8 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // アイコンを新しい絵(ハートのエースと「ゲーム」)に差し替えた。
 // v3→v4(2026年10月): ソリティアを第5版(必ず全部完了できる「かんたん」を追加)に更新。
 // v4→v5(2026年10月): アイコンを紫の背景・カード1枚・文字なしの絵に差し替えたため。
-const CACHE_NAME = CACHE_PREFIX + 'v5';
+// v5→v6(2026年10月): アイコンの背景をメニューと同じ紺色にし、見出しを「ゲーム」に戻したため。
+const CACHE_NAME = CACHE_PREFIX + 'v6';
 
 const APP_SHELL = [
   './',
