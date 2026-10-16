@@ -20,7 +20,8 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // v2→v3(2026年10月): ソリティアを第4版(カードの数字を大きく)に更新し、
 // アイコンを新しい絵(ハートのエースと「ゲーム」)に差し替えた。
 // v3→v4(2026年10月): ソリティアを第5版(必ず全部完了できる「かんたん」を追加)に更新。
-const CACHE_NAME = CACHE_PREFIX + 'v4';
+// v4→v5(2026年10月): アイコンを紫の背景・カード1枚・文字なしの絵に差し替えたため。
+const CACHE_NAME = CACHE_PREFIX + 'v5';
 
 const APP_SHELL = [
   './',
