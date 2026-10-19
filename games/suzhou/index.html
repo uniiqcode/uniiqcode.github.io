@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>蘇州</title>
+<meta name="theme-color" content="#1F4D3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="蘇州">
+<!-- faviconはSVGをその場で埋め込んでいる(ほかのゲームと同じやり方)。「中」の牌 -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='12' y='4' width='40' height='54' rx='6' fill='%23F7F1E1' stroke='%23333' stroke-width='2'/%3E%3Ctext x='32' y='43' font-size='30' font-weight='bold' text-anchor='middle' fill='%23c62828'%3E%E4%B8%AD%3C/text%3E%3C/svg%3E">
+
+<!--
+  games/suzhou/index.html: 蘇州(麻雀牌の山から、同じ牌を2枚ずつ取るゲーム)
+  公開URL: https://uniiqcode.github.io/games/suzhou/
+
+  ・2026年10月、niisanの依頼で追加。名前はniisan指定。見た目・操作・保存のしかたは
+    ほかのゲーム(ソリティア・フリーセル・数独)を踏襲している(上のボタン、横向き時の左端
+    メニュー、[メニュー]ボタン、戻す、自動保存、クリア画面と難易度別のベスト記録)。
+  ・このファイル1枚で完結(外部JS/CSSなし、サーバーAPIなし)。牌の絵はSVGでその場で描く
+    (スマホの麻雀牌の絵文字は機種によって崩れたり小さかったりするため使わない)。
+  ・ルール: 取れるのは、上に牌が乗っておらず、左か右のどちらかが空いている牌だけ。
+    同じ牌を2枚選ぶと取れる。花牌(梅蘭菊竹)どうし、季節牌(春夏秋冬)どうしは、
+    違う字でも組にできる。全部取ればクリア。
+  ・段階: 初級36枚(縦向きでも大きく見える低い山)、中級80枚、上級144枚(正式な亀の形。
+    横向きがおすすめ)。上のボタンを押すたびに 初級 → 中級 → 上級 と切り替わる。
+  ・必ず解ける積み方: 山の形から「取れる牌を2枚選んで取る」をくり返して全部の場所を
+    空にし、その2枚ずつに同じ牌を割り当てる。取った順にたどれば必ず全部取れる。
+  ・お年寄り向けの工夫(niisan指定):
+      ヒント … 今取れる組を1つ光らせる。
+      混ぜる … 取れる組が無くなったら出る。残りの牌を、必ず解ける並びに置きなおす。
+      戻す   … 何回でも1手ずつ戻せる(混ぜるも戻せる)。
+    「取れる牌を明るくする」は入れない(niisan指定)。
+  ・ヒント・混ぜるを使ったクリアは、ベスト記録には数えない(数独のヒントと同じ扱い)。
+-->
+<style>
+  :root {
+    --felt: #1F4D3A;
+    --felt-dark: #173B2C;
+    --bar: rgba(0, 0, 0, 0.28);
+    --text: #F3F1E8;
+    --tile: #FBF6E9;
+    --tile-edge: #C9B98F;
+    --tile-edge-dark: #9C8B5E;
+    --sel: #FFE27A;
+    --hint: #FFD54F;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 30%, var(--felt), var(--felt-dark));
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+  }
+  body {
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* ---- 上部バー(ほかのゲームと同じ) ---- */
+  .bar {
+    flex: none; display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px; background: var(--bar);
+  }
+  .bar button, .bar .menu-link {
+    font: inherit; font-size: 14px; color: var(--text);
+    background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px; padding: 6px 8px; min-height: 34px; white-space: nowrap;
+  }
+  .bar .menu-link { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+  .bar button:active, .bar .menu-link:active { background: rgba(255, 255, 255, 0.28); }
+  .bar button:disabled { opacity: 0.4; }
+  .bar .stats {
+    margin-left: auto; font-size: 13px; text-align: right; line-height: 1.25;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  @media (orientation: portrait) and (max-width: 380px) {
+    .bar { gap: 4px; padding: 8px 6px; }
+    .bar button, .bar .menu-link { font-size: 12px; padding: 6px 6px; }
+  }
+  @media (orientation: landscape) {
+    body { flex-direction: row; }
+    .bar {
+      flex-direction: column; align-items: stretch; justify-content: flex-start;
+      gap: 8px; padding: 10px 8px; width: 92px;
+    }
+    .bar button, .bar .menu-link { padding: 8px 4px; min-height: 44px; font-size: 13px; }
+    .bar .stats { margin-left: 0; margin-top: auto; text-align: center; font-size: 14px; }
+  }
+
+  /* ---- 盤面と牌 ---- */
+  #board { position: relative; flex: 1; touch-action: manipulation; overflow: hidden; }
+  .tile {
+    position: absolute; left: 0; top: 0;
+    border-radius: 12%/9%;
+    background: linear-gradient(160deg, #FFFDF5, var(--tile));
+    transition: opacity 0.2s ease;
+  }
+  .tile svg { position: absolute; inset: 6% 7%; width: 86%; height: 88%; }
+  .tile.sel { background: var(--sel); }
+  .tile.hint { animation: hint 0.7s ease-in-out 4; }
+  @keyframes hint {
+    0%, 100% { background: var(--tile); }
+    50% { background: var(--hint); }
+  }
+  .tile.shake { animation: shake 0.3s; }
+  @keyframes shake {
+    0%, 100% { margin-left: 0; }
+    25% { margin-left: -4px; }
+    75% { margin-left: 4px; }
+  }
+
+  /* ---- 詰まった時の「混ぜる」・お知らせ・クリア画面 ---- */
+  #stuck {
+    position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+    z-index: 5000; display: none; text-align: center;
+    background: rgba(0, 0, 0, 0.6); border-radius: 16px; padding: 10px 16px;
+  }
+  #stuck p { margin: 0 0 8px; font-size: 15px; }
+  #stuck button {
+    font: inherit; font-size: 16px; font-weight: bold; color: #222;
+    background: var(--hint); border: none; border-radius: 999px; padding: 10px 26px;
+  }
+  #notice {
+    position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+    z-index: 5000; display: none; white-space: nowrap;
+    background: rgba(0, 0, 0, 0.55); border-radius: 999px; padding: 6px 14px; font-size: 13px;
+  }
+  #overlay {
+    position: fixed; inset: 0; z-index: 6000; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+  }
+  #overlay.show { display: flex; }
+  .dialog {
+    background: #FFFDF7; color: #222; border-radius: 16px;
+    padding: 24px 28px; text-align: center; min-width: 240px; max-width: calc(100vw - 32px);
+  }
+  .dialog h2 { margin: 0 0 12px; font-size: 24px; }
+  .dialog p { margin: 4px 0; font-size: 15px; }
+  .dialog button {
+    margin-top: 16px; font: inherit; font-size: 16px; font-weight: bold;
+    color: #fff; background: var(--felt); border: none; border-radius: 10px;
+    padding: 10px 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <button id="newBtn">新しく</button>
+  <button id="levelBtn">初級</button>
+  <button id="undoBtn">戻す</button>
+  <button id="hintBtn">ヒント</button>
+  <div class="stats">
+    <div id="timeLabel">0:00</div>
+    <div id="leftLabel"></div>
+  </div>
+  <a class="menu-link" href="../">メニュー</a>
+</div>
+
+<div id="board">
+  <div id="notice">横向きにすると牌が大きくなります</div>
+  <div id="stuck">
+    <p>取れる組がなくなりました</p>
+    <button id="shuffleBtn">混ぜる</button>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="dialog">
+    <h2>クリア！</h2>
+    <p id="resultText"></p>
+    <p id="recordText"></p>
+    <button id="againBtn">もう一度</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SAVE_KEY = 'suzhou-state-v1';
+  var STATS_KEY = 'suzhou-stats-v1';
+  var LEVEL_NAMES = ['初級', '中級', '上級'];
+
+  // ---------- 山の形 ----------
+  // 座標は牌の半分の幅・高さを1とした単位(x, y)と段(z)。牌1枚は 2×2 の広さを占める。
+  function rect(x0, x1, y0, y1, z) {
+    var out = [];
+    for (var y = y0; y <= y1; y += 2) for (var x = x0; x <= x1; x += 2) out.push([x, y, z]);
+    return out;
+  }
+  var LAYOUTS = [
+    // 初級 36枚: 6×4 + 4×2 + 2×2。どの段も下の段の真上にそろえて積む(半分ずらすと、
+    // どの牌が上に乗っているか分かりにくいため)
+    [].concat(rect(0, 10, 0, 6, 0), rect(2, 8, 2, 4, 1), rect(4, 6, 2, 4, 2)),
+    // 中級 80枚: 8×6 + 6×4 + 4×2
+    [].concat(rect(0, 14, 0, 10, 0), rect(2, 12, 2, 8, 1), rect(4, 10, 4, 6, 2)),
+    // 上級 144枚: 正式な亀の形(1段目87 + 2段目36 + 3段目16 + 4段目4 + 頂上1)
+    [].concat(
+      rect(2, 24, 0, 0, 0), rect(6, 20, 2, 2, 0), rect(4, 22, 4, 4, 0),
+      rect(2, 24, 6, 6, 0), rect(2, 24, 8, 8, 0),
+      rect(4, 22, 10, 10, 0), rect(6, 20, 12, 12, 0), rect(2, 24, 14, 14, 0),
+      [[0, 7, 0], [26, 7, 0], [28, 7, 0]],
+      rect(8, 18, 2, 12, 1), rect(10, 16, 4, 10, 2), rect(12, 14, 6, 8, 3), [[13, 7, 4]]
+    )
+  ];
+
+  // ---------- 牌の種類 ----------
+  // 0-8 萬子1-9、9-17 筒子1-9、18-26 索子1-9、27-33 東南西北白發中、
+  // 34-37 花牌 梅蘭菊竹、38-41 季節牌 春夏秋冬(花どうし・季節どうしは違う字でも組になる)
+  function matchKey(k) { return k < 34 ? k : (k < 38 ? 'F' : 'S'); }
+
+  // 組(2枚ずつ)の一覧を作る
+  function pairList(level) {
+    var pairs = [], i, kinds = [];
+    for (i = 0; i < 34; i++) kinds.push(i);
+    shuffle(kinds);
+    if (level === 0) {
+      for (i = 0; i < 18; i++) pairs.push([kinds[i], kinds[i]]);           // 18種類を1組ずつ
+    } else if (level === 1) {
+      for (i = 0; i < 34; i++) pairs.push([kinds[i], kinds[i]]);           // 全34種類を1組ずつ
+      for (i = 0; i < 6; i++) pairs.push([kinds[i], kinds[i]]);            // うち6種類はもう1組
+    } else {
+      for (i = 0; i < 34; i++) { pairs.push([i, i]); pairs.push([i, i]); } // 34種類×4枚
+      var f = shuffle([34, 35, 36, 37]), s = shuffle([38, 39, 40, 41]);
+      pairs.push([f[0], f[1]], [f[2], f[3]], [s[0], s[1]], [s[2], s[3]]);
+    }
+    return shuffle(pairs);
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  // ---------- 取れるかどうか ----------
+  // tiles: [{x,y,z,k,gone}]。上に重なる牌が無く、左右どちらかが空いていれば取れる。
+  function isFree(tiles, t) {
+    var left = false, right = false;
+    for (var i = 0; i < tiles.length; i++) {
+      var o = tiles[i];
+      if (o === t || o.gone) continue;
+      if (Math.abs(o.x - t.x) < 2 && Math.abs(o.y - t.y) < 2) {
+        if (o.z === t.z + 1) return false;                 // 上に乗っている
+      }
+      if (o.z === t.z && Math.abs(o.y - t.y) < 2) {
+        if (o.x === t.x - 2) left = true;
+        if (o.x === t.x + 2) right = true;
+      }
+    }
+    return !(left && right);
+  }
+
+  // 必ず解ける積み方: 空いていない場所(spots)から、取れる場所を2つ選んで空ける、をくり返す。
+  // その2か所ずつに組(pairs)を割り当てる。うまくいかなければ(取れる場所が1つしか無い等)やり直す。
+  function assign(spots, pairs) {
+    for (var attempt = 0; attempt < 200; attempt++) {
+      var work = spots.map(function (s) { return { x: s.x, y: s.y, z: s.z, k: -1, gone: false, ref: s }; });
+      var ok = true;
+      for (var p = 0; p < pairs.length; p++) {
+        var free = work.filter(function (t) { return !t.gone && isFree(work, t); });
+        if (free.length < 2) { ok = false; break; }
+        shuffle(free);
+        free[0].k = pairs[p][0]; free[0].gone = true;
+        free[1].k = pairs[p][1]; free[1].gone = true;
+      }
+      if (ok) return work.map(function (t) { return t.k; });
+      shuffle(pairs);
+    }
+    return null;
+  }
+
+  // ---------- 状態 ----------
+  var board = document.getElementById('board');
+  var undoBtn = document.getElementById('undoBtn');
+  var hintBtn = document.getElementById('hintBtn');
+  var levelBtn = document.getElementById('levelBtn');
+  var stuckEl = document.getElementById('stuck');
+  var noticeEl = document.getElementById('notice');
+  var overlay = document.getElementById('overlay');
+  var state;          // {level, tiles:[{x,y,z,k,gone}], moves, elapsed, won, hints, shuffles}
+  var history = [];
+  var els = [];
+  var sel = -1;
+  var timerStart = null;
+  var hintTimer = null;
+
+  function storageGet(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+  function storageSet(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* 保存できない環境では無視 */ } }
+
+  function currentElapsed() { return state ? state.elapsed + (timerStart ? Date.now() - timerStart : 0) : 0; }
+  function startTimer() { if (!timerStart && state && !state.won) timerStart = Date.now(); }
+  function stopTimer() { if (state) state.elapsed = currentElapsed(); timerStart = null; }
+  function fmtTime(ms) { var s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+
+  function save() {
+    storageSet(SAVE_KEY, { state: state, history: history.slice(-300), elapsed: currentElapsed() });
+  }
+  function load() {
+    var saved = storageGet(SAVE_KEY);
+    if (!saved || !saved.state || !saved.state.tiles) return false;
+    state = saved.state;
+    state.elapsed = saved.elapsed || 0;
+    history = saved.history || [];
+    return true;
+  }
+
+  function newGame(level) {
+    var spots = LAYOUTS[level].map(function (p) { return { x: p[0], y: p[1], z: p[2] }; });
+    var kinds = assign(spots, pairList(level));
+    state = {
+      level: level, moves: 0, elapsed: 0, won: false, hints: 0, shuffles: 0,
+      tiles: spots.map(function (s, i) { return { x: s.x, y: s.y, z: s.z, k: kinds[i], gone: false }; })
+    };
+    history = []; sel = -1; timerStart = null;
+    overlay.classList.remove('show');
+    buildTiles();
+    save();
+    layout();
+  }
+
+  // ---------- 操作 ----------
+  function snapshot() {
+    history.push(JSON.stringify({ k: state.tiles.map(function (t) { return t.k; }),
+      g: state.tiles.map(function (t) { return t.gone ? 1 : 0; }), moves: state.moves }));
+    if (history.length > 400) history.shift();
+  }
+  function undo() {
+    if (!history.length || state.won) return;
+    var prev = JSON.parse(history.pop());
+    state.tiles.forEach(function (t, i) { t.k = prev.k[i]; t.gone = !!prev.g[i]; });
+    state.moves = prev.moves;
+    sel = -1;
+    buildTiles();
+    afterChange();
+  }
+
+  function tap(i) {
+    var t = state.tiles[i];
+    if (t.gone || state.won) return;
+    if (!isFree(state.tiles, t)) { shake(i); return; }
+    if (sel === i) { sel = -1; render(); return; }
+    if (sel >= 0 && matchKey(state.tiles[sel].k) === matchKey(t.k)) {
+      snapshot();
+      state.tiles[sel].gone = true; t.gone = true;
+      state.moves++;
+      sel = -1;
+      startTimer();
+      afterChange();
+      return;
+    }
+    sel = i;
+    render();
+  }
+
+  function shake(i) {
+    var el = els[i];
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  }
+
+  function freePairs() {
+    var free = [];
+    state.tiles.forEach(function (t, i) { if (!t.gone && isFree(state.tiles, t)) free.push(i); });
+    for (var a = 0; a < free.length; a++) for (var b = a + 1; b < free.length; b++) {
+      if (matchKey(state.tiles[free[a]].k) === matchKey(state.tiles[free[b]].k)) return [free[a], free[b]];
+    }
+    return null;
+  }
+
+  function hint() {
+    if (state.won) return;
+    var p = freePairs();
+    if (!p) { render(); return; }
+    state.hints++;
+    save();
+    clearHint();
+    p.forEach(function (i) { els[i].classList.add('hint'); });
+    hintTimer = setTimeout(clearHint, 2900);
+  }
+  function clearHint() {
+    if (hintTimer) clearTimeout(hintTimer);
+    hintTimer = null;
+    els.forEach(function (el) { el.classList.remove('hint'); });
+  }
+
+  // 残りの牌を、必ず解ける並びに置きなおす(残りの場所に、残りの牌を組ごとに割り当てなおす)
+  function reshuffle() {
+    var rest = state.tiles.filter(function (t) { return !t.gone; });
+    var groups = {};
+    rest.forEach(function (t) { var m = matchKey(t.k); (groups[m] = groups[m] || []).push(t.k); });
+    var pairs = [];
+    Object.keys(groups).forEach(function (m) {
+      var g = shuffle(groups[m]);
+      for (var i = 0; i + 1 < g.length; i += 2) pairs.push([g[i], g[i + 1]]);
+    });
+    var kinds = assign(rest, shuffle(pairs));
+    if (!kinds) return;
+    snapshot();
+    rest.forEach(function (t, i) { t.k = kinds[i]; });
+    state.shuffles++;
+    state.moves++;
+    sel = -1;
+    buildTiles();
+    afterChange();
+  }
+
+  function afterChange() {
+    clearHint();
+    if (state.tiles.every(function (t) { return t.gone; }) && !state.won) {
+      state.won = true;
+      stopTimer();
+      recordClear();
+    }
+    save();
+    render();
+  }
+
+  function recordClear() {
+    var stats = storageGet(STATS_KEY) || {};
+    var key = 'L' + state.level;
+    var s = stats[key] || { clears: 0, best: null };
+    s.clears++;
+    var helped = state.hints || state.shuffles;
+    var isBest = !helped && (s.best === null || state.elapsed < s.best);
+    if (isBest) s.best = state.elapsed;
+    stats[key] = s;
+    storageSet(STATS_KEY, stats);
+    var extra = [];
+    if (state.hints) extra.push('ヒント' + state.hints + '回');
+    if (state.shuffles) extra.push('混ぜる' + state.shuffles + '回');
+    document.getElementById('resultText').textContent =
+      LEVEL_NAMES[state.level] + ' ・ ' + fmtTime(state.elapsed) + (extra.length ? ' ・ ' + extra.join(' ・ ') : '');
+    document.getElementById('recordText').textContent =
+      (isBest ? 'ベスト記録！ ' : (s.best !== null ? 'ベスト ' + fmtTime(s.best) + ' ・ ' : '')) +
+      LEVEL_NAMES[state.level] + 'クリア ' + s.clears + '回';
+    setTimeout(function () { overlay.classList.add('show'); }, 500);
+  }
+
+  // ---------- 牌の絵(SVG、viewBox 0 0 30 40) ----------
+  var NUMS = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  var C = { b: '#1F4E9C', g: '#2E7D32', r: '#C62828', k: '#1B1B1B' };
+  var SERIF = 'font-family="Hiragino Mincho ProN,Yu Mincho,Noto Serif JP,serif" font-weight="700" text-anchor="middle"';
+
+  function dot(x, y, r, c) {
+    return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="none" stroke="' + C[c] + '" stroke-width="' + (r * 0.42).toFixed(2) + '"/>' +
+      '<circle cx="' + x + '" cy="' + y + '" r="' + (r * 0.35).toFixed(2) + '" fill="' + C[c] + '"/>';
+  }
+  var DOTS = [
+    [[15, 20, 10, 'r']],
+    [[15, 11, 5.5, 'g'], [15, 29, 5.5, 'b']],
+    [[8, 9, 4.6, 'b'], [15, 20, 4.6, 'r'], [22, 31, 4.6, 'g']],
+    [[9, 11, 5, 'b'], [21, 11, 5, 'g'], [9, 29, 5, 'g'], [21, 29, 5, 'b']],
+    [[8, 9, 4.4, 'b'], [22, 9, 4.4, 'g'], [15, 20, 4.4, 'r'], [8, 31, 4.4, 'g'], [22, 31, 4.4, 'b']],
+    [[9, 8, 4.2, 'g'], [21, 8, 4.2, 'g'], [9, 21, 4.2, 'r'], [21, 21, 4.2, 'r'], [9, 32, 4.2, 'r'], [21, 32, 4.2, 'r']],
+    [[7, 6, 3.4, 'g'], [15, 10, 3.4, 'g'], [23, 14, 3.4, 'g'], [9, 24, 3.7, 'r'], [21, 24, 3.7, 'r'], [9, 33, 3.7, 'r'], [21, 33, 3.7, 'r']],
+    [[9, 6.5, 3.8, 'b'], [21, 6.5, 3.8, 'b'], [9, 15.5, 3.8, 'b'], [21, 15.5, 3.8, 'b'],
+     [9, 24.5, 3.8, 'b'], [21, 24.5, 3.8, 'b'], [9, 33.5, 3.8, 'b'], [21, 33.5, 3.8, 'b']],
+    [[7.5, 9, 3.5, 'b'], [15, 9, 3.5, 'b'], [22.5, 9, 3.5, 'b'], [7.5, 20, 3.5, 'r'], [15, 20, 3.5, 'r'],
+     [22.5, 20, 3.5, 'r'], [7.5, 31, 3.5, 'g'], [15, 31, 3.5, 'g'], [22.5, 31, 3.5, 'g']]
+  ];
+  function stick(x, y, h, c, w) {
+    w = w || 4;
+    return '<rect x="' + (x - w / 2) + '" y="' + (y - h / 2) + '" width="' + w + '" height="' + h + '" rx="' + (w * 0.4) + '" fill="' + C[c] + '"/>' +
+      '<line x1="' + (x - w / 2) + '" y1="' + y + '" x2="' + (x + w / 2) + '" y2="' + y + '" stroke="#FBF6E9" stroke-width="0.8"/>';
+  }
+  var STICKS = [
+    null,
+    [[15, 11, 14, 'g'], [15, 29, 14, 'g']],
+    [[15, 11, 14, 'g'], [9, 29, 14, 'g'], [21, 29, 14, 'g']],
+    [[9, 11, 14, 'g'], [21, 11, 14, 'g'], [9, 29, 14, 'g'], [21, 29, 14, 'g']],
+    [[8, 10, 13, 'g'], [22, 10, 13, 'g'], [15, 20, 12, 'r'], [8, 30, 13, 'g'], [22, 30, 13, 'g']],
+    [[7, 11, 14, 'g'], [15, 11, 14, 'g'], [23, 11, 14, 'g'], [7, 29, 14, 'g'], [15, 29, 14, 'g'], [23, 29, 14, 'g']],
+    [[15, 7, 9, 'r'], [7, 20, 10, 'g'], [15, 20, 10, 'g'], [23, 20, 10, 'g'], [7, 32, 10, 'g'], [15, 32, 10, 'g'], [23, 32, 10, 'g']],
+    [[5, 11, 14, 'g'], [11.7, 11, 14, 'g'], [18.3, 11, 14, 'g'], [25, 11, 14, 'g'],
+     [5, 29, 14, 'g'], [11.7, 29, 14, 'g'], [18.3, 29, 14, 'g'], [25, 29, 14, 'g']],
+    [[7, 7.5, 10, 'g'], [15, 7.5, 10, 'r'], [23, 7.5, 10, 'g'], [7, 20, 10, 'g'], [15, 20, 10, 'r'],
+     [23, 20, 10, 'g'], [7, 32.5, 10, 'g'], [15, 32.5, 10, 'r'], [23, 32.5, 10, 'g']]
+  ];
+  var HONORS = [['東', 'k'], ['南', 'k'], ['西', 'k'], ['北', 'k'], ['白', ''], ['發', 'g'], ['中', 'r']];
+  var FLOWERS = ['梅', '蘭', '菊', '竹'], SEASONS = ['春', '夏', '秋', '冬'];
+
+  function tileSvg(k) {
+    var s = '';
+    if (k < 9) {
+      s = '<text x="15" y="17" font-size="15" ' + SERIF + ' fill="' + C.k + '">' + NUMS[k] + '</text>' +
+          '<text x="15" y="36" font-size="16" ' + SERIF + ' fill="' + C.r + '">萬</text>';
+    } else if (k < 18) {
+      DOTS[k - 9].forEach(function (d) { s += dot(d[0], d[1], d[2], d[3]); });
+    } else if (k < 27) {
+      var n = k - 18;
+      if (n === 0) {
+        // 一索: 大きな竹1本(中ほどを赤く)
+        s = '<rect x="11" y="4" width="8" height="32" rx="3" fill="' + C.g + '"/>' +
+            '<rect x="11" y="16" width="8" height="8" fill="' + C.r + '"/>' +
+            '<line x1="11" y1="12" x2="19" y2="12" stroke="#FBF6E9" stroke-width="1"/>' +
+            '<line x1="11" y1="28" x2="19" y2="28" stroke="#FBF6E9" stroke-width="1"/>';
+      } else {
+        STICKS[n].forEach(function (d) { s += stick(d[0], d[1], d[2], d[3]); });
+      }
+    } else if (k < 34) {
+      var h = HONORS[k - 27];
+      if (h[0] === '白') s = '<rect x="5" y="6" width="20" height="28" rx="2" fill="none" stroke="' + C.b + '" stroke-width="2"/>';
+      else s = '<text x="15" y="29" font-size="22" ' + SERIF + ' fill="' + C[h[1]] + '">' + h[0] + '</text>';
+    } else if (k < 38) {
+      s = '<text x="15" y="27" font-size="19" ' + SERIF + ' fill="#B0306A">' + FLOWERS[k - 34] + '</text>' +
+          '<text x="15" y="37" font-size="7" ' + SERIF + ' fill="#B0306A">花</text>';
+    } else {
+      s = '<text x="15" y="27" font-size="19" ' + SERIF + ' fill="#C46A00">' + SEASONS[k - 38] + '</text>' +
+          '<text x="15" y="37" font-size="7" ' + SERIF + ' fill="#C46A00">季</text>';
+    }
+    return '<svg viewBox="0 0 30 40" aria-hidden="true">' + s + '</svg>';
+  }
+
+  // ---------- 描画 ----------
+  var L = {};
+  function buildTiles() {
+    els.forEach(function (el) { el.remove(); });
+    els = state.tiles.map(function (t, i) {
+      var el = document.createElement('div');
+      el.className = 'tile';
+      el.dataset.i = i;
+      el.innerHTML = tileSvg(t.k);
+      board.appendChild(el);
+      return el;
+    });
+  }
+
+  function layout() {
+    var W = board.clientWidth, H = board.clientHeight, pad = 8;
+    var tiles = state.tiles;
+    var maxX = 0, maxY = 0, maxZ = 0;
+    tiles.forEach(function (t) { maxX = Math.max(maxX, t.x + 2); maxY = Math.max(maxY, t.y + 2); maxZ = Math.max(maxZ, t.z); });
+    // 牌の縦横比、1段ごとのずらし、側面の厚み(牌の幅に対する割合)。段の重なりが分かるよう、ずらしと厚みは大きめ
+    var RATIO = 1.3, SHIFT = 0.13, EDGE = 0.09;
+    var tw = Math.min((W - pad * 2) / (maxX / 2 + maxZ * SHIFT + EDGE),
+                      (H - pad * 2) / (maxY / 2 * RATIO + maxZ * SHIFT + EDGE));
+    tw = Math.floor(tw);
+    var th = Math.round(tw * RATIO), d = tw * SHIFT, e = Math.max(2, Math.round(tw * EDGE));
+    var totalW = maxX / 2 * tw + maxZ * d + e, totalH = maxY / 2 * th + maxZ * d + e;
+    L = { tw: tw, th: th, d: d, e: e,
+      left: (W - totalW) / 2 + maxZ * d, top: (H - totalH) / 2 + maxZ * d };
+    var portrait = window.matchMedia('(orientation: portrait)').matches;
+    noticeEl.style.display = state.level === 2 && portrait ? 'block' : 'none';
+    render();
+  }
+
+  function render() {
+    state.tiles.forEach(function (t, i) {
+      var el = els[i];
+      if (t.gone) { el.style.display = 'none'; return; }
+      el.style.display = '';
+      el.style.width = L.tw + 'px';
+      el.style.height = L.th + 'px';
+      el.style.transform = 'translate(' + (L.left + t.x / 2 * L.tw - t.z * L.d) + 'px,' + (L.top + t.y / 2 * L.th - t.z * L.d) + 'px)';
+      el.style.zIndex = t.z * 1000 + t.y * 30 + t.x;
+      // 牌の厚み(右下の側面)と影
+      // 上の段ほど、下の牌に落ちる影を濃く大きくして、高さを感じやすくする
+      var sh = Math.round(L.e * (1 + t.z * 0.6));
+      el.style.boxShadow = L.e + 'px ' + L.e + 'px 0 var(--tile-edge), ' +
+        (L.e + 1) + 'px ' + (L.e + 1) + 'px 0 var(--tile-edge-dark), ' +
+        (sh + 1) + 'px ' + (sh + 2) + 'px ' + (3 + t.z * 2) + 'px rgba(0,0,0,' + (0.35 + t.z * 0.08).toFixed(2) + ')';
+      el.classList.toggle('sel', i === sel);
+    });
+    var left = state.tiles.filter(function (t) { return !t.gone; }).length;
+    document.getElementById('leftLabel').textContent = '残り' + left;
+    document.getElementById('timeLabel').textContent = fmtTime(currentElapsed());
+    levelBtn.textContent = LEVEL_NAMES[state.level];
+    undoBtn.disabled = !history.length || state.won;
+    var stuck = !state.won && left > 0 && !freePairs();
+    stuckEl.style.display = stuck ? 'block' : 'none';
+    hintBtn.disabled = state.won || stuck;
+  }
+  setInterval(function () { if (state) document.getElementById('timeLabel').textContent = fmtTime(currentElapsed()); }, 500);
+
+  // ---------- イベント ----------
+  board.addEventListener('click', function (e) {
+    var el = e.target.closest('.tile');
+    if (el) tap(Number(el.dataset.i));
+    else if (sel >= 0) { sel = -1; render(); }
+  });
+  document.getElementById('newBtn').addEventListener('click', function () {
+    if (state.moves > 0 && !state.won && !confirm('今のゲームをやめて、新しく始めますか？')) return;
+    newGame(state.level);
+  });
+  levelBtn.addEventListener('click', function () {
+    var next = (state.level + 1) % 3;
+    if (state.moves > 0 && !state.won && !confirm('「' + LEVEL_NAMES[next] + '」で新しく始めますか？')) return;
+    newGame(next);
+  });
+  undoBtn.addEventListener('click', undo);
+  hintBtn.addEventListener('click', hint);
+  document.getElementById('shuffleBtn').addEventListener('click', reshuffle);
+  document.getElementById('againBtn').addEventListener('click', function () { newGame(state.level); });
+
+  window.addEventListener('resize', layout);
+  document.addEventListener('visibilitychange', function () {
+    // 裏に回っている間は時間を止める
+    if (document.hidden) { if (timerStart) { stopTimer(); save(); } }
+    else if (state.moves > 0) startTimer();
+  });
+
+  // ---------- 起動 ----------
+  if (load()) {
+    if (state.moves > 0 && !state.won) startTimer();
+    buildTiles();
+    layout();
+    if (state.won) newGame(state.level);
+  } else {
+    newGame(0);
+  }
+})();
+</script>
+</body>
+</html>
