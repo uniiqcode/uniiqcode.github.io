@@ -23,7 +23,8 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // v4→v5(2026年10月): アイコンを紫の背景・カード1枚・文字なしの絵に差し替えたため。
 // v5→v6(2026年10月): アイコンの背景をメニューと同じ紺色にし、見出しを「ゲーム」に戻したため。
 // v6→v7(2026年10月): フリーセル(freecell/)を追加したため。
-const CACHE_NAME = CACHE_PREFIX + 'v7';
+// v7→v8(2026年10月): 蘇州(suzhou/)を追加したため。
+const CACHE_NAME = CACHE_PREFIX + 'v8';
 
 const APP_SHELL = [
   './',
@@ -40,6 +41,8 @@ const APP_SHELL = [
   'freecell/index.html',
   'sudoku/',
   'sudoku/index.html',
+  'suzhou/',
+  'suzhou/index.html',
 ];
 
 self.addEventListener('install', (event) => {

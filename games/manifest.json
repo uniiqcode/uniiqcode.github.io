@@ -1,7 +1,7 @@
 {
   "name": "ゲーム",
   "short_name": "ゲーム",
-  "description": "uniiqcode.github.io/games ゲーム(ソリティア・フリーセル・数独)",
+  "description": "uniiqcode.github.io/games ゲーム(ソリティア・フリーセル・数独・蘇州)",
   "id": "./",
   "start_url": "./",
   "scope": "./",
