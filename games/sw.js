@@ -26,7 +26,8 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // v7→v8(2026年10月): 蘇州(suzhou/)を追加したため。
 // v8→v9(2026年10月): 蘇州の漢字を筆の書体(Yuji Syuku)にし、8索を本物の形にしたため。
 // v9→v10(2026年10月): 蘇州の一索を鳥の絵に、花牌・季節牌をフリー素材の絵にしたため。
-const CACHE_NAME = CACHE_PREFIX + 'v10';
+// v10→v11(2026年10月): 蘇州の一筒を大きな丸の絵にしたため。
+const CACHE_NAME = CACHE_PREFIX + 'v11';
 
 const APP_SHELL = [
   './',
