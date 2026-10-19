@@ -24,7 +24,8 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // v5→v6(2026年10月): アイコンの背景をメニューと同じ紺色にし、見出しを「ゲーム」に戻したため。
 // v6→v7(2026年10月): フリーセル(freecell/)を追加したため。
 // v7→v8(2026年10月): 蘇州(suzhou/)を追加したため。
-const CACHE_NAME = CACHE_PREFIX + 'v8';
+// v8→v9(2026年10月): 蘇州の漢字を筆の書体(Yuji Syuku)にし、8索を本物の形にしたため。
+const CACHE_NAME = CACHE_PREFIX + 'v9';
 
 const APP_SHELL = [
   './',
