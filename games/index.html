@@ -80,8 +80,10 @@
   header { max-width: 720px; margin: 0 auto 22px; }
   h1 { margin: 0; font-size: 30px; letter-spacing: 0.08em; }
   header p { margin: 4px 0 0; color: var(--sub); font-size: 13px; letter-spacing: 0.1em; }
-  /* 見出しの下の説明文(2026年11月、niisan指定)。読みやすいよう、URLの行より大きく濃くする */
-  header p.lead { margin-top: 6px; color: var(--text); font-size: 16px; }
+  /* 見出し「ゲーム」の右に、空白を空けて小さい字で添える説明文(2026年11月、niisan指定)。
+     見出しの下の段には置かず、狭い画面でも横1行に収める(折り返さない) */
+  h1 .lead { margin-left: 0.8em; font-size: 15px; font-weight: normal; letter-spacing: 0.05em;
+             white-space: nowrap; vertical-align: 0.25em; }
 
   .list {
     max-width: 720px; margin: 0 auto;
@@ -113,8 +115,7 @@
 <body>
 
 <header>
-  <h1>ゲーム</h1>
-  <p class="lead">広告のない無料ゲーム</p>
+  <h1>ゲーム<span class="lead">広告のない無料ゲーム</span></h1>
   <p>uniiqcode.github.io/games</p>
 </header>
 
