@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>uniiqcode</title>
+<title>Uniiqcode</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
   :root { --bg: #ffffff; --fg: #1f2328; --muted: #656d76; --line: #d0d7de; --link: #0969da; }
   @media (prefers-color-scheme: dark) {
@@ -12,7 +15,9 @@
   body { margin: 0; background: var(--bg); color: var(--fg);
          font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif; line-height: 1.7; }
   main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h1 { margin: 0 0 12px; line-height: 0; }
+  h1 img { display: block; height: 48px; width: auto; max-width: 100%; }
+  @media (prefers-color-scheme: dark) { h1 img { filter: invert(1); } }
   p.lead { color: var(--muted); margin: 0 0 32px; }
   ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
   li { border-bottom: 1px solid var(--line); }
@@ -23,7 +28,7 @@
 </head>
 <body>
 <main>
-  <h1>uniiqcode</h1>
+  <h1><img src="assets/logo/uniiqcode-wordmark.svg" alt="Uniiqcode" width="866" height="194"></h1>
   <p class="lead">作成したページの一覧</p>
   <ul>
     <!-- ページを追加したら、ここに1行ずつ足す: <li><a href="ファイル名.html">ページの名前</a></li> -->

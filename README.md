@@ -14,3 +14,10 @@
 - ファイル名は半角英数字とハイフンにする（日本語や空白はURLが崩れる）
 - このリポジトリは public なので、中身はすべて誰でも見られる。パスワード・個人情報は置かない
 - `.nojekyll` は、ファイルを加工せずそのまま公開するための空ファイル。消さない
+
+## ロゴとアイコン
+
+- `assets/logo/uniiqcode-wordmark.svg` … 文字ロゴ「Uniiqcode」（背景透明・黒1色）
+- `assets/logo/uniiqcode-u.svg` … Uマーク（背景透明・黒1色）
+- `favicon.svg` / `favicon.ico` / `apple-touch-icon.png` … トップページのアイコン（Uマークから作成）
+- 暗い背景では、CSS の `filter: invert(1)` で白にして使う
