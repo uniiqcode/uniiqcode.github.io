@@ -1,5 +1,5 @@
 /**
- * uniiqcode.github.io/weather/ - 現在地の天気 用 Service Worker
+ * uniiqcode.github.io/weather/ - ここの天気 用 Service Worker
  * -----------------------------------------------------------------------
  * 範囲は weather/ のみ。登録は weather/index.html が行う。
  *
@@ -12,7 +12,7 @@
  */
 
 const CACHE_PREFIX = 'uniiqcode-weather-';
-// v1(2026年11月): 初版。
+// v1(2026年11月): 初版(アプリ名「ここの天気」、文字入りアイコン)。
 const CACHE_NAME = CACHE_PREFIX + 'v1';
 
 const APP_SHELL = [
