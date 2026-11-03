@@ -27,7 +27,8 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // v8→v9(2026年10月): 蘇州の漢字を筆の書体(Yuji Syuku)にし、8索を本物の形にしたため。
 // v9→v10(2026年10月): 蘇州の一索を鳥の絵に、花牌・季節牌をフリー素材の絵にしたため。
 // v10→v11(2026年10月): 蘇州の一筒を大きな丸の絵にしたため。
-const CACHE_NAME = CACHE_PREFIX + 'v11';
+// v11→v12(2026年11月): アイコンを白い背景・赤いハートとAの絵に、タブ用をハートだけに替えたため。
+const CACHE_NAME = CACHE_PREFIX + 'v12';
 
 const APP_SHELL = [
   './',
@@ -35,6 +36,8 @@ const APP_SHELL = [
   'manifest.json',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'icons/icon-maskable-192.png',
+  'icons/icon-maskable-512.png',
   'icons/apple-touch-icon.png',
   'icons/favicon-32.png',
   'icons/favicon-16.png',
