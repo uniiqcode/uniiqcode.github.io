@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 「ここの天気」アイコン。文字は描画時のフォント(IPAゴシック)に依存するため、PNGに書き出したものを使う -->
+  <rect width="512" height="512" fill="#2f7fe0"/>
+  <g transform="translate(40 6) scale(0.82)">
+    <circle cx="312" cy="176" r="78" fill="#ffd43b"/>
+    <g fill="#ffd43b">
+      <rect x="304" y="58" width="16" height="36" rx="8"/>
+      <rect x="410" y="168" width="36" height="16" rx="8"/>
+      <rect x="384" y="80" width="16" height="36" rx="8" transform="rotate(45 392 98)"/>
+    </g>
+    <path d="M150 330 a62 62 0 0 1 10-123 a86 86 0 0 1 164-14 a66 66 0 0 1 36 137 z" fill="#ffffff"/>
+    <g fill="#bfe0ff">
+      <path d="M190 360 q14 26 0 40 q-14-14 0-40z"/>
+      <path d="M256 360 q14 26 0 40 q-14-14 0-40z"/>
+      <path d="M322 360 q14 26 0 40 q-14-14 0-40z"/>
+    </g>
+  </g>
+  <text x="256" y="452" text-anchor="middle" font-family="IPAGothic, 'Noto Sans JP', sans-serif" font-size="84" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" letter-spacing="2">ここの天気</text>
+</svg>
