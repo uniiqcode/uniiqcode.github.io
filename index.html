@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="Uniiqcode">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#ece9e2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Uniiqcode">
@@ -25,14 +25,19 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Uniiqcode">
 <style>
-  :root { --bg: #ffffff; --line: #d0d7de; --focus: #0969da; }
+  /* 背景は真っ白ではなく、少し温かみのある薄いグレー（まぶしさを抑え、白いアイコンの縁も見える） */
+  :root { --bg: #ece9e2; --line: rgba(0, 0, 0, 0.14); --focus: #0969da; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0d1117; --line: #30363d; --focus: #4493f8; }
+    :root { --bg: #0d1117; --line: rgba(255, 255, 255, 0.16); --focus: #4493f8; }
   }
   body { margin: 0; background: var(--bg); }
   main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
-  h1 { margin: 0 0 40px; line-height: 0; }
-  h1 img { display: block; height: 48px; width: auto; max-width: 100%; }
+  /* Uマーク＋文字ロゴを横に並べる */
+  h1 { margin: 0 0 40px; line-height: 0; display: flex; align-items: flex-end; gap: 14px; }
+  h1 img { display: block; width: auto; }
+  h1 .mark { height: 56px; }
+  /* 文字ロゴは「q」の下に伸びる分だけ下げて、Uマークの底と文字の並び（ベースライン）をそろえる */
+  h1 .wordmark { height: 48px; margin-bottom: -8px; min-width: 0; max-width: calc(100% - 56px); object-fit: contain; object-position: left bottom; }
   @media (prefers-color-scheme: dark) { h1 img { filter: invert(1); } }
   .apps { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 24px; }
   .apps a { display: block; border-radius: 22%; transition: transform .15s; }
@@ -43,7 +48,7 @@
 </head>
 <body>
 <main>
-  <h1><img src="assets/logo/uniiqcode-wordmark.svg" alt="Uniiqcode" width="866" height="194"></h1>
+  <h1><img class="mark" src="assets/logo/uniiqcode-u.svg" alt="" width="162" height="216"><img class="wordmark" src="assets/logo/uniiqcode-wordmark.svg" alt="Uniiqcode" width="866" height="194"></h1>
   <ul class="apps">
     <!-- アプリを追加したら、ここに1行ずつ足す: <li><a href="フォルダ名/"><img src="アイコン.png" alt="アプリの名前" title="アプリの名前"></a></li> -->
     <li><a href="games/"><img src="games/icons/icon-192.png" alt="ゲーム" title="ゲーム"></a></li>
