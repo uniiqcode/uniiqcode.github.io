@@ -8,31 +8,29 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-  :root { --bg: #ffffff; --fg: #1f2328; --muted: #656d76; --line: #d0d7de; --link: #0969da; }
+  :root { --bg: #ffffff; --line: #d0d7de; --focus: #0969da; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0d1117; --fg: #e6edf3; --muted: #8d96a0; --line: #30363d; --link: #4493f8; }
+    :root { --bg: #0d1117; --line: #30363d; --focus: #4493f8; }
   }
-  body { margin: 0; background: var(--bg); color: var(--fg);
-         font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif; line-height: 1.7; }
+  body { margin: 0; background: var(--bg); }
   main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
-  h1 { margin: 0 0 12px; line-height: 0; }
+  h1 { margin: 0 0 40px; line-height: 0; }
   h1 img { display: block; height: 48px; width: auto; max-width: 100%; }
   @media (prefers-color-scheme: dark) { h1 img { filter: invert(1); } }
-  p.lead { color: var(--muted); margin: 0 0 32px; }
-  ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
-  li { border-bottom: 1px solid var(--line); }
-  li a { display: block; padding: 14px 4px; color: var(--link); text-decoration: none; }
-  li a:hover { text-decoration: underline; }
-  li.empty { padding: 14px 4px; color: var(--muted); }
+  .apps { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 24px; }
+  .apps a { display: block; border-radius: 22%; transition: transform .15s; }
+  .apps a:hover { transform: translateY(-2px); }
+  .apps a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .apps img { display: block; width: 96px; height: 96px; border-radius: 22%; border: 1px solid var(--line); }
 </style>
 </head>
 <body>
 <main>
   <h1><img src="assets/logo/uniiqcode-wordmark.svg" alt="Uniiqcode" width="866" height="194"></h1>
-  <p class="lead">作成したページの一覧</p>
-  <ul>
-    <!-- ページを追加したら、ここに1行ずつ足す: <li><a href="ファイル名.html">ページの名前</a></li> -->
-    <li><a href="games/">ゲーム</a></li>
+  <ul class="apps">
+    <!-- アプリを追加したら、ここに1行ずつ足す: <li><a href="フォルダ名/"><img src="アイコン.png" alt="アプリの名前" title="アプリの名前"></a></li> -->
+    <li><a href="games/"><img src="games/icons/icon-192.png" alt="ゲーム" title="ゲーム"></a></li>
+    <li><a href="gyosu-sakaba/"><img src="assets/icons/gyosu-sakaba.png" alt="業スー酒場" title="業スー酒場"></a></li>
   </ul>
 </main>
 </body>
