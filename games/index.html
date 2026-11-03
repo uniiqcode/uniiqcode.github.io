@@ -25,6 +25,7 @@
 <!-- 名前は、ホーム画面のアイコンの下・ブラウザのタブ・画面の見出しとも「ゲーム」
      (2026年10月、niisan指定。一時「シニアゲーム」としていたが戻した)。 -->
 <meta name="apple-mobile-web-app-title" content="ゲーム">
+<meta name="description" content="広告のない無料ゲーム(ソリティア・フリーセル・数独・蘇州)">
 <meta name="theme-color" content="#1B2430">
 
 <!--
@@ -66,6 +67,8 @@
   header { max-width: 720px; margin: 0 auto 22px; }
   h1 { margin: 0; font-size: 30px; letter-spacing: 0.08em; }
   header p { margin: 4px 0 0; color: var(--sub); font-size: 13px; letter-spacing: 0.1em; }
+  /* 見出しの下の説明文(2026年11月、niisan指定)。読みやすいよう、URLの行より大きく濃くする */
+  header p.lead { margin-top: 6px; color: var(--text); font-size: 16px; }
 
   .list {
     max-width: 720px; margin: 0 auto;
@@ -98,6 +101,7 @@
 
 <header>
   <h1>ゲーム</h1>
+  <p class="lead">広告のない無料ゲーム</p>
   <p>uniiqcode.github.io/games</p>
 </header>
 
