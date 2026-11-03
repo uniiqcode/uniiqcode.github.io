@@ -1,0 +1,49 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+const P=new URLSearchParams(location.search);
+const W=+P.get('w')||1024, H=+P.get('h')||1024, variant=P.get('v')||'a', elev=+(P.get('elev')??12), azim=+(P.get('azim')??-18);
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+r.setSize(W,H); r.setPixelRatio(1); r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
+r.toneMapping=THREE.ACESFilmicToneMapping; r.outputColorSpace=THREE.SRGBColorSpace;
+document.body.appendChild(r.domElement);
+const scene=new THREE.Scene();
+// Geometry measured from the 2D mark (units = px of 162x216 mark, y flipped, origin at bottom center)
+const R=24, CR=51, cx=0, cy=209-134, topY=209-90;   // tube radius, centerline arc radius, arc center, arm top
+const path=new THREE.CurvePath();
+path.add(new THREE.LineCurve3(new THREE.Vector3(-CR,topY,0),new THREE.Vector3(-CR,cy,0)));
+path.add(new THREE.EllipseCurve(cx,cy,CR,CR,Math.PI,2*Math.PI,false));
+path.curves[1]=new (class extends THREE.Curve{getPoint(t,o=new THREE.Vector3()){const a=Math.PI+t*Math.PI;return o.set(cx+CR*Math.cos(a),cy+CR*Math.sin(a),0);}})();
+path.add(new THREE.LineCurve3(new THREE.Vector3(CR,cy,0),new THREE.Vector3(CR,topY,0)));
+const mat=new THREE.MeshPhysicalMaterial({color:+(P.get('col')||'0x2b2b2b'),roughness:0.28,metalness:0.0,clearcoat:0.6,clearcoatRoughness:0.25});
+const g=new THREE.Group(); scene.add(g);
+const add=m=>{m.castShadow=true;m.receiveShadow=true;g.add(m);return m;};
+add(new THREE.Mesh(new THREE.TubeGeometry(path,200,R,64,false),mat));
+for(const s of [-1,1]) add(new THREE.Mesh(new THREE.SphereGeometry(R,64,32),mat)).position.set(s*CR,topY,0);
+// balls: 'a' = logo layout (float above), 'b' = resting on the arm tops
+const BR=25;
+for(const s of [-1,1]){
+  const b=add(new THREE.Mesh(new THREE.SphereGeometry(BR,64,32),mat));
+  if(variant==='a') b.position.set(s*(121.5-81),209-31,0);
+  else { b.position.set(s*CR, topY+R+BR-2, 0); }
+}
+g.position.y=-0; 
+// ground with shadow only
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(2000,2000),new THREE.ShadowMaterial({opacity:0.28}));
+ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; if(P.get('ground')==='1') scene.add(ground);
+// lights
+scene.add(new THREE.HemisphereLight(0xffffff,0x555555,1.4));
+const key=new THREE.DirectionalLight(0xffffff,3.2); key.position.set(-160,320,220); key.castShadow=true;
+Object.assign(key.shadow.camera,{left:-200,right:200,top:300,bottom:-100,near:1,far:1200}); key.shadow.mapSize.set(4096,4096); key.shadow.radius=6; key.shadow.bias=-0.0005;
+scene.add(key);
+const rim=new THREE.DirectionalLight(0xffffff,1.2); rim.position.set(200,150,-200); scene.add(rim);
+const fill=new THREE.DirectionalLight(0xffffff,0.6); fill.position.set(200,80,250); scene.add(fill);
+// camera
+const cam=new THREE.PerspectiveCamera(28,W/H,1,3000);
+const target=new THREE.Vector3(0,+(P.get('ty')||105),0), dist=+(P.get('dist')||620);
+const e=elev*Math.PI/180, az=azim*Math.PI/180;
+cam.position.set(target.x+dist*Math.cos(e)*Math.sin(az), target.y+dist*Math.sin(e), target.z+dist*Math.cos(e)*Math.cos(az));
+cam.lookAt(target);
+r.render(scene,cam); window.done=true;
+</script></body></html>
