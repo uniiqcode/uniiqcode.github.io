@@ -9,10 +9,12 @@
      (games/)の中に置き、相対パスで読む(GitHub Pagesのサブフォルダで動かすため)。
      scopeは games/ 全体なので、各ゲーム(solitaire/・sudoku/)もアプリの中で開き、
      各ゲームの[メニュー]ボタンでここへ戻る。
-     アイコンは、メニューと同じ紺色(#1B2430)の背景に、少し傾けたハートのエースのカード1枚
-     (2026年10月、niisanがChatGPTで生成した絵の背景と影を紺色に置き換えたもの)。名前はアイコンの
-     下に「ゲーム」と出るため、絵の中に文字は入れていない。ブラウザのタブ用(favicon-16/32)は、
-     カードの部分だけを切り出している。 -->
+     アイコンは、白い背景に、左上の「Aと小さな赤いハート」と真ん中の大きな赤いハートを置き、
+     全体を右へ10°傾けた絵(2026年11月、niisan指定。それまでの紺色の背景・トランプの外形はやめた)。
+     iPhoneは背景が透明だと黒く塗るため、ホーム画面用は白い背景にしている。Androidの丸い切り抜き用
+     (icon-maskable-*)は、同じ絵を少し小さくして余白を広げたもの。名前はアイコンの下に「ゲーム」と
+     出るため、絵の中に文字は入れていない。ブラウザのタブ用(favicon-16/32)は、小さいとAが読めない
+     ため、背景なしのハートだけ(niisan指定)。 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -23,6 +25,20 @@
 <!-- 名前は、ホーム画面のアイコンの下・ブラウザのタブ・画面の見出しとも「ゲーム」
      (2026年10月、niisan指定。一時「シニアゲーム」としていたが戻した)。 -->
 <meta name="apple-mobile-web-app-title" content="ゲーム">
+<meta name="description" content="広告のない無料ゲーム(ソリティア・フリーセル・数独・蘇州)">
+<!-- SNS(LINE・X・Facebookなど)でリンクを共有した時に出る、題名・説明文・画像(2026年11月、niisan指定)。
+     SNSはページの外から読むため、URLだけは相対パスにできず、公開先のURLをそのまま書く。
+     画像(icons/og-image.png、1200x630)はアイコンの絵に「ゲーム」「広告のない無料ゲーム」を添えたもの。 -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="ゲーム">
+<meta property="og:description" content="広告のない無料ゲーム(ソリティア・フリーセル・数独・蘇州)">
+<meta property="og:url" content="https://uniiqcode.github.io/games/">
+<meta property="og:image" content="https://uniiqcode.github.io/games/icons/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="赤いハートのエースの絵と「ゲーム 広告のない無料ゲーム」の文字">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1B2430">
 
 <!--
@@ -64,6 +80,8 @@
   header { max-width: 720px; margin: 0 auto 22px; }
   h1 { margin: 0; font-size: 30px; letter-spacing: 0.08em; }
   header p { margin: 4px 0 0; color: var(--sub); font-size: 13px; letter-spacing: 0.1em; }
+  /* 見出しの下の説明文(2026年11月、niisan指定)。読みやすいよう、URLの行より大きく濃くする */
+  header p.lead { margin-top: 6px; color: var(--text); font-size: 16px; }
 
   .list {
     max-width: 720px; margin: 0 auto;
@@ -96,6 +114,7 @@
 
 <header>
   <h1>ゲーム</h1>
+  <p class="lead">広告のない無料ゲーム</p>
   <p>uniiqcode.github.io/games</p>
 </header>
 
