@@ -35,10 +35,18 @@
   /* Uマーク＋文字ロゴを横に並べる */
   h1 { margin: 0 0 40px; line-height: 0; display: flex; align-items: flex-end; gap: 14px; }
   h1 img { display: block; width: auto; }
-  h1 .mark { height: 56px; }
-  /* 文字ロゴは「q」の下に伸びる分だけ下げて、Uマークの底と文字の並び（ベースライン）をそろえる */
-  h1 .wordmark { height: 48px; margin-bottom: -8px; min-width: 0; max-width: calc(100% - 56px); object-fit: contain; object-position: left bottom; }
-  @media (prefers-color-scheme: dark) { h1 img { filter: invert(1); } }
+  /* Uマークは白い正方形のシールにして、ページに貼ったように少し影をつける */
+  h1 .sticker { flex: none; width: 64px; height: 64px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+                background: #fff; border-radius: 10px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), 0 3px 8px rgba(0, 0, 0, 0.12); }
+  h1 .mark { height: 46px; }
+  /* 文字ロゴは「q」の下に伸びる分だけ下げて、シールの底と文字の並び（ベースライン）をそろえる */
+  h1 .wordmark { height: 48px; margin-bottom: -10px; min-width: 0; max-width: calc(100% - 78px); object-fit: contain; object-position: left bottom; }
+  /* ダークモードでは文字ロゴだけ白に。シールは白地に黒のまま（貼ったシールなので色は変わらない） */
+  @media (prefers-color-scheme: dark) {
+    h1 .wordmark { filter: invert(1); }
+    h1 .sticker { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 3px 10px rgba(0, 0, 0, 0.45); }
+  }
   .apps { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 24px; }
   .apps a { display: block; border-radius: 22%; transition: transform .15s; }
   .apps a:hover { transform: translateY(-2px); }
@@ -48,7 +56,7 @@
 </head>
 <body>
 <main>
-  <h1><img class="mark" src="assets/logo/uniiqcode-u.svg" alt="" width="162" height="216"><img class="wordmark" src="assets/logo/uniiqcode-wordmark.svg" alt="Uniiqcode" width="866" height="194"></h1>
+  <h1><span class="sticker"><img class="mark" src="assets/logo/uniiqcode-u.svg" alt="" width="162" height="216"></span><img class="wordmark" src="assets/logo/uniiqcode-wordmark.svg" alt="Uniiqcode" width="866" height="194"></h1>
   <ul class="apps">
     <!-- アプリを追加したら、ここに1行ずつ足す: <li><a href="フォルダ名/"><img src="アイコン.png" alt="アプリの名前" title="アプリの名前"></a></li> -->
     <li><a href="games/"><img src="games/icons/icon-192.png" alt="ゲーム" title="ゲーム"></a></li>
