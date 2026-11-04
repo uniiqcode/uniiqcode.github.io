@@ -4,7 +4,7 @@
  * 範囲は weather/ のみ。登録は weather/index.html が行う。
  *
  * 方針: 自分のファイル(画面・app.js・アイコン)だけを stale-while-revalidate で保存する。
- *   予報API(Open-Meteo)と地名API(国土地理院)は別のサイトなので扱わない
+ *   予報API(Open-Meteo)と地名API・市区町村表(国土地理院)は別のサイトなので扱わない
  *   (古い予報を出さないため。前回の予報は app.js が localStorage に持っている)。
  *
  * ファイルを増やした・変えた時は APP_SHELL に足し、CACHE_NAME の番号を上げる。
@@ -13,7 +13,8 @@
 
 const CACHE_PREFIX = 'uniiqcode-weather-';
 // v1(2026年11月): 初版(アプリ名「ここの天気」、文字入りアイコン)。
-const CACHE_NAME = CACHE_PREFIX + 'v1';
+// v1→v2(2026年11月): 地名を「市区町村+町名」で出すようにした(app.js)。
+const CACHE_NAME = CACHE_PREFIX + 'v2';
 
 const APP_SHELL = [
   './',

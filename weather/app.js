@@ -249,13 +249,45 @@ async function fetchForecast(lat, lon) {
   return r.json();
 }
 
-// 国土地理院の逆ジオコーダで町名を得る(取れなくても表示は続ける)
+// 国土地理院の市区町村コード表(muni.js)を読み込む。1回だけ。
+// 中身は GSI.MUNI_ARRAY["13101"] = '13,東京都,13101,千代田区' のような行の並び。
+// 政令市の区は '14,神奈川県,14101,横浜市　鶴見区' のように市と区の間に空白がある。
+// fetch ではなく <script> で読むので、相手のサイトのCORS設定に左右されない。
+let muniPromise = null;
+function loadMuni() {
+  if (!muniPromise) {
+    muniPromise = new Promise((resolve) => {
+      window.GSI = window.GSI || {};
+      const sc = document.createElement('script');
+      sc.src = 'https://maps.gsi.go.jp/js/muni.js';
+      sc.onload = () => resolve(window.GSI.MUNI_ARRAY || null);
+      sc.onerror = () => { muniPromise = null; resolve(null); };
+      document.head.appendChild(sc);
+    });
+  }
+  return muniPromise;
+}
+function muniName(table, code) {
+  if (!table || !code) return '';
+  const row = table[code] || table[String(parseInt(code, 10))] || table[String(code).padStart(5, '0')];
+  if (!row) return '';
+  return (String(row).split(',')[3] || '').replace(/[\s　]/g, ''); // 都道府県は付けない
+}
+
+// 国土地理院の逆ジオコーダで「市区町村+町名」を得る(例: 横浜市鶴見区鶴見中央一丁目)。
+// 取れなくても表示は続ける。
+const PLACE_VER = 2; // 地名の作り方を変えたら上げる(保存してある古い地名を使わないため)
 async function fetchPlace(lat, lon) {
   try {
-    const r = await fetch(`https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lat=${lat}&lon=${lon}`);
+    const [r, table] = await Promise.all([
+      fetch(`https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lat=${lat}&lon=${lon}`),
+      loadMuni(),
+    ]);
     if (!r.ok) return '';
     const j = await r.json();
-    return (j.results && j.results.lv01Nm && j.results.lv01Nm !== '－') ? j.results.lv01Nm : '';
+    const res = j.results || {};
+    const town = res.lv01Nm && res.lv01Nm !== '－' ? res.lv01Nm : '';
+    return muniName(table, res.muniCd) + town;
   } catch { return ''; }
 }
 
@@ -280,9 +312,9 @@ async function refresh() {
     }
     const [data, place] = await Promise.all([
       fetchForecast(lat, lon),
-      state && state.lat === lat && state.lon === lon && state.place ? Promise.resolve(state.place) : fetchPlace(lat, lon),
+      state && state.lat === lat && state.lon === lon && state.place && state.placeVer === PLACE_VER ? Promise.resolve(state.place) : fetchPlace(lat, lon),
     ]);
-    state = { lat, lon, place, data, fetchedAt: Date.now() };
+    state = { lat, lon, place, placeVer: PLACE_VER, data, fetchedAt: Date.now() };
     save(state);
     renderAll(state);
   } catch (e) {
