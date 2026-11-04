@@ -16,7 +16,9 @@ const CACHE_PREFIX = 'uniiqcode-weather-';
 // v1→v2(2026年11月): 地名を「市区町村+町名」で出すようにした(app.js)。
 // v2→v3(2026年11月): 地名用には正確な位置を送り、予報用は約1kmに丸めたまま(切り替えスイッチ付き)。
 // v3→v4(2026年11月): 「6時間以内の雨」に雨雲レーダー(ウェザーニュース・tenki.jp・気象庁)へのリンクを足した。
-const CACHE_NAME = CACHE_PREFIX + 'v4';
+// v4→v5(2026年11月): 見出しの左に題名「ここの天気」を足し、アイコンを晴れ・雲・雨・現在地のピン(文字なし)に替え、
+// タブ用(16/32px)・SNS共有用の画像を足したため。
+const CACHE_NAME = CACHE_PREFIX + 'v5';
 
 const APP_SHELL = [
   './',
@@ -25,9 +27,11 @@ const APP_SHELL = [
   'manifest.json',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'icons/icon-maskable-192.png',
   'icons/icon-maskable-512.png',
   'icons/apple-touch-icon.png',
   'icons/favicon-32.png',
+  'icons/favicon-16.png',
 ];
 
 self.addEventListener('install', (event) => {
