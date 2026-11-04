@@ -2,7 +2,7 @@
  * ここの天気(uniiqcode.github.io/weather/)
  * -----------------------------------------------------------------------
  * GPSで得た位置から、Open-Meteo の予報を取って4つの欄に表示する。
- *   1. 6時間以内の雨 … 降り始めの時刻(15分刻み)。降っている時は止む時刻
+ *   1. 8時間以内の雨 … 降り始めの時刻(15分刻み)。降っている時は止む時刻
  *   2. 24時間       … 1時間ごとの雨量(mm/h)と気温
  *   3. 2〜3日目     … 3時間ごとの雨量(3時間の平均 mm/h)と気温
  *   4. 4〜7日目     … 1日ごとの天気と最高/最低気温
@@ -25,6 +25,7 @@
 
 const STORE_KEY = 'uniiqcode-weather-v1';
 const STALE_MS = 10 * 60 * 1000; // 画面に戻った時、これより古ければ取り直す
+const RAIN_HOURS = 8;           // 「8時間以内の雨」の範囲(朝8時に洗濯物を干して夕方まで見るため)
 const RAIN_MIN = 0.1;            // これ以上(mm/区間)を「雨」とみなす
 
 const $ = (id) => document.getElementById(id);
@@ -86,9 +87,9 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 // ---- 各欄の組み立て -------------------------------------------------------
 
-// 1. 6時間以内の雨
+// 1. 8時間以内の雨
 function renderRainStart(data, now) {
-  const end = new Date(now.getTime() + 6 * 3600000);
+  const end = new Date(now.getTime() + RAIN_HOURS * 3600000);
   // 区間 [start, end) と雨量 mm の並びを作る。15分値があればそれ、無ければ1時間値
   let slots = [], step = 15;
   const m = data.minutely_15;
@@ -96,7 +97,7 @@ function renderRainStart(data, now) {
     slots = m.time.map((t, i) => ({ end: parseLocal(t), mm: m.precipitation[i] }))
       .map((s) => ({ start: new Date(s.end.getTime() - 15 * 60000), end: s.end, mm: s.mm }))
       .filter((s) => s.mm != null && s.end > now && s.start < end);
-    // 15分値が6時間先まで届いていなければ1時間値を使う
+    // 15分値が8時間先まで届いていなければ1時間値を使う
     if (!slots.length || slots[slots.length - 1].end < new Date(end.getTime() - 15 * 60000)) slots = [];
   }
   if (!slots.length) {
@@ -119,7 +120,7 @@ function renderRainStart(data, now) {
     const dry = slots.find((s) => !wet(s));
     html = dry
       ? `<div class="big wet">いま雨。${fmt(dry.start)}ごろ止む見込み</div>`
-      : `<div class="big wet">いま雨。6時間以内は止まない見込み</div>`;
+      : `<div class="big wet">いま雨。8時間以内は止まない見込み</div>`;
   } else {
     const first = slots.find(wet);
     if (first) {
@@ -131,7 +132,7 @@ function renderRainStart(data, now) {
       html = `<div class="big wet">${fmt(first.start)}ごろ降り始め</div>` +
         `<div class="note">${rel}。はじめの1時間で ${hourMm.toFixed(1)} mm の見込み</div>`;
     } else {
-      html = '<div class="big">6時間以内は降らない見込み</div>';
+      html = '<div class="big">8時間以内は降らない見込み</div>';
     }
   }
   box.innerHTML = html + `<div class="note">${note}</div>`;
@@ -230,7 +231,7 @@ function renderAll(state) {
   $('meta').textContent = `${f.getHours()}:${String(f.getMinutes()).padStart(2, '0')} 取得`;
 }
 
-// ---- 雨雲レーダーへのリンク(「6時間以内の雨」の欄の下) ----------------------
+// ---- 雨雲レーダーへのリンク(「8時間以内の雨」の欄の下) ----------------------
 // ウェザーニュース: 市区町村ごとのページ /onebox/radar/<都道府県のローマ字>/<市区町村コード>/
 //   (例: 東京都荒川区 → /onebox/radar/tokyo/13118/)。コードが無ければ全国のページ。
 // tenki.jp: 「現在地の雨雲」のページ。位置は tenki.jp のページ自身が端末に尋ねる。
@@ -266,7 +267,7 @@ async function fetchForecast(lat, lon) {
   const q = new URLSearchParams({
     latitude: lat, longitude: lon, timezone: 'auto', forecast_days: '7',
     hourly: 'temperature_2m,precipitation,weather_code,is_day',
-    minutely_15: 'precipitation', forecast_minutely_15: '32',
+    minutely_15: 'precipitation', forecast_minutely_15: '36',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max',
   });
   const r = await fetch(`https://api.open-meteo.com/v1/forecast?${q}`);
