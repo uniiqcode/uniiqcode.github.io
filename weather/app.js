@@ -224,9 +224,30 @@ function renderAll(state) {
   renderHourly(data, now);
   renderThreeHour(data, now);
   renderDaily(data, now);
+  renderRadarLinks(state);
   $('place').textContent = place || `${state.lat}, ${state.lon}`;
   const f = new Date(fetchedAt);
   $('meta').textContent = `${f.getHours()}:${String(f.getMinutes()).padStart(2, '0')} 取得`;
+}
+
+// ---- 雨雲レーダーへのリンク(「6時間以内の雨」の欄の下) ----------------------
+// ウェザーニュース: 市区町村ごとのページ /onebox/radar/<都道府県のローマ字>/<市区町村コード>/
+//   (例: 東京都荒川区 → /onebox/radar/tokyo/13118/)。コードが無ければ全国のページ。
+// tenki.jp: 「現在地の雨雲」のページ。位置は tenki.jp のページ自身が端末に尋ねる。
+// 気象庁: 高解像度降水ナウキャスト。URLの # の後ろに緯度経度と縮尺を入れられる。
+const PREF_ROMAJI = ['', 'hokkaido', 'aomori', 'iwate', 'miyagi', 'akita', 'yamagata', 'fukushima',
+  'ibaraki', 'tochigi', 'gunma', 'saitama', 'chiba', 'tokyo', 'kanagawa', 'niigata', 'toyama', 'ishikawa',
+  'fukui', 'yamanashi', 'nagano', 'gifu', 'shizuoka', 'aichi', 'mie', 'shiga', 'kyoto', 'osaka', 'hyogo',
+  'nara', 'wakayama', 'tottori', 'shimane', 'okayama', 'hiroshima', 'yamaguchi', 'tokushima', 'kagawa',
+  'ehime', 'kochi', 'fukuoka', 'saga', 'nagasaki', 'kumamoto', 'oita', 'miyazaki', 'kagoshima', 'okinawa'];
+function renderRadarLinks(st) {
+  const pref = st.muniCd ? PREF_ROMAJI[parseInt(st.muniCd.slice(0, 2), 10)] : '';
+  const wn = pref ? `https://weathernews.jp/onebox/radar/${pref}/${st.muniCd}/` : 'https://weathernews.jp/onebox/radar/';
+  const lat = st.pLat || st.lat, lon = st.pLon || st.lon;
+  const jma = `https://www.jma.go.jp/bosai/nowc/#zoom:12/lat:${lat}/lon:${lon}/colordepth:normal/elements:hrpns`;
+  const a = (href, label) => `<a href="${esc(href)}" target="_blank" rel="noopener">${label}</a>`;
+  $('radar').innerHTML = '雨雲レーダー: ' +
+    [a(wn, 'ウェザーニュース'), a('https://tenki.jp/map/', 'tenki.jp'), a(jma, '気象庁')].join(' ・ ');
 }
 
 // ---- 取得 -----------------------------------------------------------------
@@ -280,19 +301,21 @@ function muniName(table, code) {
 
 // 国土地理院の逆ジオコーダで「市区町村+町名」を得る(例: 横浜市鶴見区鶴見中央一丁目)。
 // 取れなくても表示は続ける。
-const PLACE_VER = 2; // 地名の作り方を変えたら上げる(保存してある古い地名を使わないため)
+const PLACE_VER = 3; // 地名の作り方を変えたら上げる(保存してある古い地名を使わないため)
+// 返すのは { name: 表示する地名, muniCd: 市区町村コード5桁(ウェザーニュースへのリンク用) }
 async function fetchPlace(lat, lon) {
   try {
     const [r, table] = await Promise.all([
       fetch(`https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lat=${lat}&lon=${lon}`),
       loadMuni(),
     ]);
-    if (!r.ok) return '';
+    if (!r.ok) return { name: '', muniCd: '' };
     const j = await r.json();
     const res = j.results || {};
     const town = res.lv01Nm && res.lv01Nm !== '－' ? res.lv01Nm : '';
-    return muniName(table, res.muniCd) + town;
-  } catch { return ''; }
+    const muniCd = /^\d{4,5}$/.test(res.muniCd || '') ? String(res.muniCd).padStart(5, '0') : '';
+    return { name: muniName(table, res.muniCd) + town, muniCd };
+  } catch { return { name: '', muniCd: '' }; }
 }
 
 function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch { return null; } }
@@ -320,9 +343,9 @@ async function refresh() {
     const samePlace = state && state.pLat === pLat && state.pLon === pLon && state.place && state.placeVer === PLACE_VER;
     const [data, place] = await Promise.all([
       fetchForecast(lat, lon),
-      samePlace ? Promise.resolve(state.place) : fetchPlace(pLat, pLon),
+      samePlace ? Promise.resolve({ name: state.place, muniCd: state.muniCd }) : fetchPlace(pLat, pLon),
     ]);
-    state = { lat, lon, pLat, pLon, place, placeVer: PLACE_VER, data, fetchedAt: Date.now() };
+    state = { lat, lon, pLat, pLon, place: place.name, muniCd: place.muniCd, placeVer: PLACE_VER, data, fetchedAt: Date.now() };
     save(state);
     renderAll(state);
   } catch (e) {

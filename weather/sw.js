@@ -15,7 +15,8 @@ const CACHE_PREFIX = 'uniiqcode-weather-';
 // v1(2026年11月): 初版(アプリ名「ここの天気」、文字入りアイコン)。
 // v1→v2(2026年11月): 地名を「市区町村+町名」で出すようにした(app.js)。
 // v2→v3(2026年11月): 地名用には正確な位置を送り、予報用は約1kmに丸めたまま(切り替えスイッチ付き)。
-const CACHE_NAME = CACHE_PREFIX + 'v3';
+// v3→v4(2026年11月): 「6時間以内の雨」に雨雲レーダー(ウェザーニュース・tenki.jp・気象庁)へのリンクを足した。
+const CACHE_NAME = CACHE_PREFIX + 'v4';
 
 const APP_SHELL = [
   './',
