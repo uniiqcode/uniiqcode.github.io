@@ -13,7 +13,11 @@
  * このため、表示では「区間の始まりの時刻」にずらしている。
  *
  * 日本の15分値は、Open-Meteo が1時間値などから補間したもの。降り始めの分は目安。
- * 位置は小数2桁(約1km)に丸めて送る。前回の位置と予報は localStorage に置き、
+ * 送る位置:
+ *   - 予報(Open-Meteo・海外)へは、常に小数2桁(約1km)に丸めて送る。予報の細かさは数km四方なので十分
+ *   - 地名(国土地理院・国の機関)へは、正確な値(小数5桁=約1m)を送る。町名を正しく出すため。
+ *     画面の一番下のスイッチを入れると、地名用も約1kmに丸める(設定は localStorage)
+ * 前回の位置と予報は localStorage に置き、
  * 次に開いた時はまずそれを表示してから更新する。
  * -----------------------------------------------------------------------
  */
@@ -302,19 +306,23 @@ async function refresh() {
   busy = true; $('reload').disabled = true;
   $('meta').textContent = state ? '更新しています…' : '位置を取得しています…';
   try {
-    let lat, lon;
+    let lat, lon, pLat, pLon; // lat/lon: 予報用(約1km)、pLat/pLon: 地名用
     try {
       const c = await getPosition();
-      lat = c.latitude.toFixed(2); lon = c.longitude.toFixed(2);
+      lat = c.latitude.toFixed(2); lon = c.longitude.toFixed(2); // 2桁≒1km
+      const digits = roundOn() ? 2 : 5; // 5桁≒1m
+      pLat = c.latitude.toFixed(digits); pLon = c.longitude.toFixed(digits);
     } catch (e) {
       if (!state) throw e;
       lat = state.lat; lon = state.lon; // 位置が取れなければ前回の場所で
+      pLat = state.pLat || lat; pLon = state.pLon || lon;
     }
+    const samePlace = state && state.pLat === pLat && state.pLon === pLon && state.place && state.placeVer === PLACE_VER;
     const [data, place] = await Promise.all([
       fetchForecast(lat, lon),
-      state && state.lat === lat && state.lon === lon && state.place && state.placeVer === PLACE_VER ? Promise.resolve(state.place) : fetchPlace(lat, lon),
+      samePlace ? Promise.resolve(state.place) : fetchPlace(pLat, pLon),
     ]);
-    state = { lat, lon, place, placeVer: PLACE_VER, data, fetchedAt: Date.now() };
+    state = { lat, lon, pLat, pLon, place, placeVer: PLACE_VER, data, fetchedAt: Date.now() };
     save(state);
     renderAll(state);
   } catch (e) {
@@ -329,6 +337,22 @@ async function refresh() {
     busy = false; $('reload').disabled = false;
   }
 }
+
+// ---- 地名用の位置も丸めるかどうか(既定はオフ=地名には正確な位置) -----------
+const ROUND_KEY = 'uniiqcode-weather-round';
+function roundOn() { try { return localStorage.getItem(ROUND_KEY) === '1'; } catch { return false; } }
+function showRoundNote() {
+  $('roundNote').textContent = roundOn()
+    ? 'オン: 地名も約1kmに丸めて送信(町名がずれることがあります)'
+    : 'オフ: 地名には正確な位置を国土地理院へ送信(町名も正確)';
+}
+$('round').checked = roundOn();
+showRoundNote();
+$('round').addEventListener('change', (e) => {
+  try { localStorage.setItem(ROUND_KEY, e.target.checked ? '1' : '0'); } catch { /* 保存できなくても今回は効く */ }
+  showRoundNote();
+  refresh();
+});
 
 $('reload').addEventListener('click', refresh);
 document.addEventListener('visibilitychange', () => {
