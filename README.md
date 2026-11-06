@@ -2,15 +2,15 @@
 
 作成したhtmlの一般公開用
 
-公開先: https://uniiqcode.github.io/
+公開先: https://uniiqcode.com/ （独自ドメイン。旧URL https://uniiqcode.github.io/ からは自動で転送される）
 
 ## ページの追加のしかた
 
 1. HTMLファイルをこのリポジトリの一番上に置く（例: `sample.html`）
 2. トップページにアイコンで出す場合は、`index.html` の `<ul class="apps">` に `<li><a href="sample.html"><img src="アイコン.png" alt="ページの名前" title="ページの名前"></a></li>` を1行足す（アイコンは正方形の画像。別のリポジトリのページのアイコンは `assets/icons/` に置く）
-3. `main` に入ると数分で公開される → `https://uniiqcode.github.io/sample.html`
+3. `main` に入ると数分で公開される → `https://uniiqcode.com/sample.html`
 
-- 画像などを使うページは、フォルダごと置く（例: `sample/index.html` → `https://uniiqcode.github.io/sample/`）
+- 画像などを使うページは、フォルダごと置く（例: `sample/index.html` → `https://uniiqcode.com/sample/`）
 - ファイル名は半角英数字とハイフンにする（日本語や空白はURLが崩れる）
 - このリポジトリは public なので、中身はすべて誰でも見られる。パスワード・個人情報は置かない
 - `.nojekyll` は、ファイルを加工せずそのまま公開するための空ファイル。消さない
@@ -25,3 +25,10 @@
 - `assets/logo/uniiqcode-u-3d.png` / `uniiqcode-u-3d-on-dark.png` … 立体のUマーク（1024×1024・背景透明）。白い背景用は黒に近いグレー、暗い背景用は明るいグレー。作り直す時は `tools/logo-3d/README.md`
 - `assets/icons/gyosu-sakaba.png` … 業スー酒場のアイコン（`uniiqcode/gyosu-sakaba` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
 - 暗い背景では、CSS の `filter: invert(1)` で白にして使う
+
+## 独自ドメイン（uniiqcode.com）
+
+- `CNAME` ファイル … GitHub Pages に独自ドメイン `uniiqcode.com` を使わせるための設定。消さない
+- DNS は Cloudflare で管理（2026年11月にお名前.com のレンタルサーバーから移した。ドメインの登録はお名前.com のまま、2027年6月に Cloudflare へ移管予定）
+  - `uniiqcode.com` … GitHub Pages の A レコード4つ・AAAA レコード4つ、`www` … `uniiqcode.github.io` への CNAME。いずれも「DNS only」（グレーの雲）。オレンジ（Proxied）にすると GitHub が HTTPS の証明書を出せなくなることがある
+- 同じアカウントのほかの GitHub Pages（例: `gyosu-sakaba`）も `https://uniiqcode.com/リポジトリ名/` で公開される

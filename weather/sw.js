@@ -19,7 +19,7 @@ const CACHE_PREFIX = 'uniiqcode-weather-';
 // v4→v5(2026年11月): 見出しの左に題名「ここの天気」を足し、アイコンを晴れ・雲・雨・現在地のピン(文字なし)に替え、
 // タブ用(16/32px)・SNS共有用の画像を足したため。
 // v5→v6(2026年11月): 「6時間以内の雨」を「8時間以内の雨」にし、題名・住所・雨の見込みの字の大きさを調整したため。
-const CACHE_NAME = CACHE_PREFIX + 'v6';
+const CACHE_NAME = CACHE_PREFIX + 'v7';
 
 const APP_SHELL = [
   './',
