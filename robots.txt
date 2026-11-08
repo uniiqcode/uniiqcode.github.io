@@ -1,0 +1,10 @@
+# uniiqcode.com 全体の robots.txt（ドメインの一番上にしか置けないため、このリポジトリに置く）
+# アプリ（別のリポジトリ）を公開したら、そのサイトマップの行を足す。docs/seo.md
+User-agent: *
+Allow: /
+# ロゴを作り直すための道具と、作業の文書(検索結果に出す必要がない)
+Disallow: /tools/
+Disallow: /docs/
+
+Sitemap: https://uniiqcode.com/sitemap.xml
+Sitemap: https://uniiqcode.com/gyosu-sakaba/sitemap.xml

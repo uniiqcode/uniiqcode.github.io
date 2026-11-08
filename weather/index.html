@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ここの天気</title>
-<meta name="description" content="ここの天気">
+<title>ここの天気｜今いる場所の雨と気温</title>
+<!-- 検索対策（SEO）: uniiqcode/claude-skills の seo-uniiqcode スキルに沿って入れた(2026年11月)。
+     ホーム画面の名前は apple-mobile-web-app-title と manifest で「ここの天気」のまま -->
+<meta name="description" content="スマホの位置情報から、今いる場所の天気予報を表示する無料のウェブアプリ。8時間以内の雨の降り始め、24時間の1時間ごとの雨量と気温、7日先までの天気と最高・最低気温が分かります。">
+<link rel="canonical" href="https://uniiqcode.com/weather/">
 <!-- アイコン: 晴れ(太陽)・雲・雨と現在地の赤いピン(icons/icon.svg から書き出し)。文字は入れない。
      ホーム画面ではアイコンの下に「ここの天気」と出る。タブ用(favicon-16/32)は小さいと潰れるため
      雲とピンだけの絵(icons/favicon.svg)にしている -->
@@ -18,16 +21,17 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:site_name" content="Uniiqcode">
-<meta property="og:title" content="ここの天気">
-<meta property="og:description" content="ここの天気">
+<meta property="og:title" content="ここの天気｜今いる場所の雨と気温">
+<meta property="og:description" content="スマホの位置情報から、今いる場所の天気予報を表示する無料のウェブアプリ。8時間以内の雨の降り始め、24時間の1時間ごとの雨量と気温、7日先までの天気と最高・最低気温が分かります。">
 <meta property="og:url" content="https://uniiqcode.com/weather/">
 <meta property="og:image" content="https://uniiqcode.com/weather/icons/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="晴れ・雲・雨と現在地のピンの絵と「ここの天気」の文字">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ここの天気">
-<meta name="twitter:description" content="ここの天気">
+<meta name="twitter:title" content="ここの天気｜今いる場所の雨と気温">
+<meta name="twitter:description" content="スマホの位置情報から、今いる場所の天気予報を表示する無料のウェブアプリ。8時間以内の雨の降り始め、24時間の1時間ごとの雨量と気温、7日先までの天気と最高・最低気温が分かります。">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "ここの天気", "url": "https://uniiqcode.com/weather/", "description": "スマホの位置情報から、今いる場所の天気予報を表示する無料のウェブアプリ。8時間以内の雨の降り始め、24時間の1時間ごとの雨量と気温、7日先までの天気と最高・最低気温が分かります。", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any (Web browser)", "inLanguage": "ja", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "JPY"}, "isPartOf": {"@type": "WebSite", "name": "Uniiqcode", "url": "https://uniiqcode.com/"}}</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#eef3f8" media="(prefers-color-scheme: light)">
@@ -173,5 +177,7 @@
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
+<!-- 「ホーム画面に追加」ボタン(uniiqcode のアプリ共通、assets/a2hs.js) -->
+<script src="../assets/a2hs.js" data-app="ここの天気" defer></script>
 </body>
 </html>
