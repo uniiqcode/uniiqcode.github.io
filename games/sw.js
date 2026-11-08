@@ -30,7 +30,7 @@ const CACHE_PREFIX = 'uniiqcode-games-';
 // v11→v12(2026年11月): アイコンを白い背景・赤いハートとAの絵に、タブ用をハートだけに替え、
 // メニューの見出しの下に「広告のない無料ゲーム」を足し、SNS共有用の説明文・画像を付けたため。
 // v12→v13(2026年11月): 説明文「広告のない無料ゲーム」を、見出しの下から見出しの右に移したため。
-const CACHE_NAME = CACHE_PREFIX + 'v15';
+const CACHE_NAME = CACHE_PREFIX + 'v16';
 
 const APP_SHELL = [
   './',

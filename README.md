@@ -31,6 +31,14 @@
 - ページを足す・変える時は、`docs/seo.md` の「ページを足す・変える時の決まり」に従う（title・description・canonical・OGP・JSON-LD、`sitemap.xml`、`robots.txt`）
 - 共通のルールは `uniiqcode/claude-skills` の `seo-uniiqcode` スキル
 
+## 「ホーム画面に追加」ボタン（アプリ共通）
+
+- `assets/a2hs.js` … アプリのページの下に「「アプリ名」をホーム画面に追加」ボタンを出す部品。Android・パソコンの Chrome/Edge は押すと追加の確認が出る。iPhone・iPad はページから追加できない（Apple の仕様）ので、押すと手順の案内を出す。ホーム画面から開いている時は出ない。「×」で閉じると、そのアプリでは30日間出ない
+- アプリのページ（manifest があるページ）の `</body>` の前に1行入れる。`data-app` はボタンに出す名前
+  - このリポジトリの中: `<script src="../assets/a2hs.js" data-app="ゲーム" defer></script>`
+  - 別のリポジトリのアプリ: `<script src="https://uniiqcode.com/assets/a2hs.js" data-app="業スー酒場" defer></script>`
+- 入れているページ: ゲーム（`games/`）、ここの天気（`weather/`）
+
 ## 独自ドメイン（uniiqcode.com）
 
 - `CNAME` ファイル … GitHub Pages に独自ドメイン `uniiqcode.com` を使わせるための設定。消さない
