@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Uniiqcode</title>
+<title>Uniiqcode｜小さく作る、ちょっと珍しいウェブアプリ</title>
+<!-- 検索対策（SEO）: uniiqcode/claude-skills の seo-uniiqcode スキルに沿って入れた(2026年11月)。docs/seo.md -->
+<meta name="description" content="Uniiqcodeは、少ない人数でも使う人が喜ぶ、世の中にない・珍しいウェブアプリを小さく作っています。広告のない無料ゲーム、今いる場所の天気、業務スーパーの食材で作る居酒屋の一品ネタ帳を公開中。">
+<link rel="canonical" href="https://uniiqcode.com/">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -16,14 +19,18 @@
 <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Uniiqcode">
-<meta property="og:title" content="Uniiqcode">
+<meta property="og:title" content="Uniiqcode｜小さく作る、ちょっと珍しいウェブアプリ">
+<meta property="og:description" content="Uniiqcodeは、少ない人数でも使う人が喜ぶ、世の中にない・珍しいウェブアプリを小さく作っています。広告のない無料ゲーム、今いる場所の天気、業務スーパーの食材で作る居酒屋の一品ネタ帳を公開中。">
+<meta property="og:locale" content="ja_JP">
 <meta property="og:url" content="https://uniiqcode.com/">
 <meta property="og:image" content="https://uniiqcode.com/assets/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Uniiqcode">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Uniiqcode">
+<meta name="twitter:title" content="Uniiqcode｜小さく作る、ちょっと珍しいウェブアプリ">
+<meta name="twitter:description" content="Uniiqcodeは、少ない人数でも使う人が喜ぶ、世の中にない・珍しいウェブアプリを小さく作っています。広告のない無料ゲーム、今いる場所の天気、業務スーパーの食材で作る居酒屋の一品ネタ帳を公開中。">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "Uniiqcode", "url": "https://uniiqcode.com/", "inLanguage": "ja", "description": "Uniiqcodeは、少ない人数でも使う人が喜ぶ、世の中にない・珍しいウェブアプリを小さく作っています。広告のない無料ゲーム、今いる場所の天気、業務スーパーの食材で作る居酒屋の一品ネタ帳を公開中。"}, {"@type": "ItemList", "name": "Uniiqcode のアプリ", "url": "https://uniiqcode.com/", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ゲーム", "url": "https://uniiqcode.com/games/"}, {"@type": "ListItem", "position": 2, "name": "ここの天気", "url": "https://uniiqcode.com/weather/"}, {"@type": "ListItem", "position": 3, "name": "業スー酒場", "url": "https://uniiqcode.com/gyosu-sakaba/"}]}]}</script>
 <style>
   /* 背景は真っ白ではなく、少し温かみのある薄いグレー（まぶしさを抑え、白いアイコンの縁も見える） */
   :root { --bg: #ece9e2; --line: rgba(0, 0, 0, 0.14); --focus: #0969da; }
@@ -58,10 +65,11 @@
 <main>
   <h1><span class="sticker"><img class="mark" src="assets/logo/uniiqcode-u.svg" alt="" width="162" height="216"></span><img class="wordmark" src="assets/logo/uniiqcode-wordmark.svg" alt="Uniiqcode" width="866" height="194"></h1>
   <ul class="apps">
-    <!-- アプリを追加したら、ここに1行ずつ足す: <li><a href="フォルダ名/"><img src="アイコン.png" alt="アプリの名前" title="アプリの名前"></a></li> -->
-    <li><a href="games/"><img src="games/icons/icon-192.png" alt="ゲーム" title="ゲーム"></a></li>
-    <li><a href="weather/"><img src="weather/icons/icon-192.png" alt="ここの天気" title="ここの天気"></a></li>
-    <li><a href="gyosu-sakaba/"><img src="assets/icons/gyosu-sakaba.png" alt="業スー酒場" title="業スー酒場"></a></li>
+    <!-- アプリを追加したら、ここに1行ずつ足す: <li><a href="フォルダ名/"><img src="アイコン.png" alt="アプリの名前" title="アプリの名前"></a></li>
+         あわせて、上の JSON-LD(ItemList)と sitemap.xml(このリポジトリのページの場合)にも足す(docs/seo.md) -->
+    <li><a href="games/"><img src="games/icons/icon-192.png" width="192" height="192" alt="ゲーム" title="ゲーム"></a></li>
+    <li><a href="weather/"><img src="weather/icons/icon-192.png" width="192" height="192" alt="ここの天気" title="ここの天気"></a></li>
+    <li><a href="gyosu-sakaba/"><img src="assets/icons/gyosu-sakaba.png" width="192" height="192" alt="業スー酒場" title="業スー酒場"></a></li>
   </ul>
 </main>
 </body>

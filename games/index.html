@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ゲーム</title>
+<title>ゲーム｜広告のない無料ゲーム</title>
 
 <!-- ホーム画面追加用(PWA)。manifest・アイコン・Service Workerはすべてこのフォルダ
      (games/)の中に置き、相対パスで読む(GitHub Pagesのサブフォルダで動かすため)。
@@ -25,14 +25,18 @@
 <!-- 名前は、ホーム画面のアイコンの下・ブラウザのタブ・画面の見出しとも「ゲーム」
      (2026年10月、niisan指定。一時「シニアゲーム」としていたが戻した)。 -->
 <meta name="apple-mobile-web-app-title" content="ゲーム">
-<meta name="description" content="広告のない無料ゲーム(ソリティア・フリーセル・数独・蘇州)">
+<!-- 検索対策（SEO）: uniiqcode/claude-skills の seo-uniiqcode スキルに沿って入れた(2026年11月)。
+     ホーム画面の名前は apple-mobile-web-app-title と manifest で「ゲーム」のまま -->
+<meta name="description" content="広告のない無料ゲーム集。ソリティア（クロンダイク）・フリーセル・数独（ナンプレ）・麻雀牌パズルの蘇州を、スマホのブラウザですぐ遊べます。一度開けば、圏外でも遊べます。">
+<link rel="canonical" href="https://uniiqcode.com/games/">
 <!-- SNS(LINE・X・Facebookなど)でリンクを共有した時に出る、題名・説明文・画像(2026年11月、niisan指定)。
      SNSはページの外から読むため、URLだけは相対パスにできず、公開先のURLをそのまま書く。
      画像(icons/og-image.png、1200x630)はアイコンの絵に「ゲーム」「広告のない無料ゲーム」を添えたもの。 -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:title" content="ゲーム">
-<meta property="og:description" content="広告のない無料ゲーム(ソリティア・フリーセル・数独・蘇州)">
+<meta property="og:site_name" content="Uniiqcode">
+<meta property="og:title" content="ゲーム｜広告のない無料ゲーム">
+<meta property="og:description" content="広告のない無料ゲーム集。ソリティア（クロンダイク）・フリーセル・数独（ナンプレ）・麻雀牌パズルの蘇州を、スマホのブラウザですぐ遊べます。一度開けば、圏外でも遊べます。">
 <meta property="og:url" content="https://uniiqcode.com/games/">
 <meta property="og:image" content="https://uniiqcode.com/games/icons/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -40,10 +44,11 @@
 <meta property="og:image:alt" content="赤いハートのエースの絵と「ゲーム 広告のない無料ゲーム」の文字">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1B2430">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "name": "広告のない無料ゲーム", "url": "https://uniiqcode.com/games/", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ソリティア", "url": "https://uniiqcode.com/games/solitaire/"}, {"@type": "ListItem", "position": 2, "name": "フリーセル", "url": "https://uniiqcode.com/games/freecell/"}, {"@type": "ListItem", "position": 3, "name": "数独", "url": "https://uniiqcode.com/games/sudoku/"}, {"@type": "ListItem", "position": 4, "name": "蘇州", "url": "https://uniiqcode.com/games/suzhou/"}]}</script>
 
 <!--
   games/index.html: ゲーム(ゲームメニュー)
-  公開URL: https://uniiqcode.github.io/games/
+  公開URL: https://uniiqcode.com/games/
 
   【uniiqcode.github.io 公開用コピー】2026年10月、niisan-tvリポジトリの
   frontend/games/index.html を複製。変更点はパスの相対化、見出し下の表記、
@@ -55,6 +60,8 @@
   ・ゲームを増やす時は、games/<ゲーム名>/index.html を置き、GAMES配列に1件足すと
     同じ形のカードがもう1枚並ぶ。オフラインでも遊べるようにするには、
     games/sw.js のファイル一覧にも足し、CACHE_NAMEの番号を上げる。
+  ・検索対策(SEO)のため、<main id="list"> の中の静的な一覧・JSON-LD(ItemList)・
+    ルートの sitemap.xml にも足す(docs/seo.md)。
 -->
 <style>
   :root {
@@ -119,7 +126,14 @@
   <p>uniiqcode.com/games</p>
 </header>
 
-<main class="list" id="list"></main>
+<!-- ゲームの一覧は検索エンジンが読めるよう HTML にも書いておく(SEO)。
+     JavaScript が動くと、絵と記録の付いたカードに描き直す(下の render())。ゲームを足す時は、ここと GAMES の両方に足す -->
+<main class="list" id="list">
+  <a class="game" href="solitaire/"><div class="body"><h2>ソリティア</h2><p class="desc">クロンダイク。タップで自動移動、1枚/3枚めくり。</p></div><span class="arrow">›</span></a>
+  <a class="game" href="freecell/"><div class="body"><h2>フリーセル</h2><p class="desc">全部表向きのトランプ。4つの空き場所を使って並べる。</p></div><span class="arrow">›</span></a>
+  <a class="game" href="sudoku/"><div class="body"><h2>数独</h2><p class="desc">ナンプレ。初級・中級・上級、メモとヒント付き。</p></div><span class="arrow">›</span></a>
+  <a class="game" href="suzhou/"><div class="body"><h2>蘇州</h2><p class="desc">麻雀牌の山から同じ牌を2枚ずつ取る。初級〜上級。</p></div><span class="arrow">›</span></a>
+</main>
 
 <script>
 (function () {

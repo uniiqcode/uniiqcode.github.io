@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- このリポジトリ（uniiqcode.github.io）のページだけを載せる。別のリポジトリのアプリは、それぞれのサイトマップ（robots.txt に列挙）。
+     ページを足した・中身を変えた時は、その行の lastmod をその日にする。docs/seo.md -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://uniiqcode.com/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://uniiqcode.com/games/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://uniiqcode.com/games/solitaire/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://uniiqcode.com/games/freecell/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://uniiqcode.com/games/sudoku/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://uniiqcode.com/games/suzhou/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://uniiqcode.com/weather/</loc><lastmod>2026-11-08</lastmod></url>
+</urlset>
