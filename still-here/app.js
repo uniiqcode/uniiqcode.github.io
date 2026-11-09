@@ -271,6 +271,20 @@
     p.setAttribute('aria-pressed', isOn ? 'true' : 'false');
   }
 
+  // 名前がボタンに収まらない時だけ、その名前の字を小さくする(単語の途中では折り返さない)。
+  // 文字は大きく(150%)したいが、Classical-Audiophile などは5列のボタンに入りきらないため。
+  function fitLabels() {
+    buttons.forEach(function (b) {
+      var f = b.querySelector('.fit');
+      var scale = 1;
+      f.style.fontSize = '';
+      while (scale > 0.5 && (f.scrollWidth > b.clientWidth - 2 || f.offsetHeight > b.clientHeight - 2)) {
+        scale -= 0.05;
+        f.style.fontSize = scale + 'em';
+      }
+    });
+  }
+
   function connect() {
     var st = STATIONS[selected];
     setState('接続中…');
@@ -291,7 +305,7 @@
       var b = document.createElement('button');
       b.type = 'button';
       // ハイフンの後ろで折り返せるようにする(長い名前が2行になる)
-      b.innerHTML = st.label.replace(/-/g, '-<wbr>');
+      b.innerHTML = '<span class="fit">' + st.label.replace(/-/g, '-<wbr>') + '</span>';
       b.title = st.name;
       b.addEventListener('click', function () {
         selected = i;
@@ -311,6 +325,9 @@
     audio.addEventListener('waiting', function () { if (isOn) setState('接続中…'); });
     audio.addEventListener('error', function () { if (isOn && audio.getAttribute('src')) setState('つながりませんでした'); });
     renderRadio();
+    fitLabels();
+    window.addEventListener('resize', function () { setTimeout(fitLabels, 100); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLabels);
   }
 
   // ---- 起動 --------------------------------------------------------------

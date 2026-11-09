@@ -65,8 +65,9 @@
     padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
              max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   }
+  /* 時刻以外の文字の倍率(遠くから読めるよう 150%) */
+  :root { --k: 1.5; }
   .col { display: flex; flex-direction: column; align-items: center; width: 100%; }
-  .col + .col { margin-top: 5vh; }
 
   /* 時刻: 数字は travelフォント(SVG)。桁ごとに固定幅の枠に入れて中央揃え */
   .time { display: flex; align-items: flex-end; height: var(--T); }
@@ -78,49 +79,56 @@
   .sec { display: flex; height: calc(var(--T) * 0.7); margin-left: calc(var(--T) * 0.12); }
   .sec .slot { width: calc(var(--T) * 0.42); }
 
-  .weekday { font-size: calc(var(--T) * 0.34); margin-top: calc(var(--T) * 0.12); letter-spacing: 0.1em; }
-  .date { font-size: calc(var(--T) * 0.22); margin-top: calc(var(--T) * 0.06); letter-spacing: 0.05em; }
-  .sun { display: flex; margin-top: calc(var(--T) * 0.12); font-size: calc(var(--T) * 0.2); }
+  .weekday { font-size: calc(var(--T) * 0.34 * var(--k)); margin-top: calc(var(--T) * 0.12); letter-spacing: 0.1em; }
+  .date { font-size: calc(var(--T) * 0.22 * var(--k)); margin-top: calc(var(--T) * 0.06); letter-spacing: 0.05em; }
+  .sun { display: flex; margin-top: calc(var(--T) * 0.12); font-size: calc(var(--T) * 0.2 * var(--k)); }
   .sun div + div { margin-left: 2em; }
   .label { opacity: 0.6; font-size: 0.75em; margin-right: 0.4em; letter-spacing: 0.1em; }
 
   /* 雨予報(文字のみ) */
-  .rain { text-align: center; max-width: 30em; }
-  .rain .main { font-size: calc(var(--T) * 0.2); line-height: 1.5; }
-  .rain .sub { font-size: calc(var(--T) * 0.13); opacity: 0.65; margin-top: 0.3em; line-height: 1.5; }
+  .rain { text-align: center; width: 100%; margin-top: 5vh; }
+  .rain .main { font-size: calc(var(--T) * 0.2 * var(--k)); line-height: 1.4; }
+  .rain .sub { font-size: calc(var(--T) * 0.13 * var(--k)); opacity: 0.65; margin-top: 0.3em; line-height: 1.5; }
 
   /* ラジオ: 背景・文字色は他と同じ。選ばれたボタンだけ色を反転 */
-  .radio { margin-top: 4vh; width: 100%; max-width: 34em; font-size: calc(var(--T) * 0.13); }
+  .radio { margin-top: 4vh; width: 100%; font-size: calc(var(--T) * 0.13 * var(--k)); }
   /* 10個のボタン(先頭が ON/OFF、残り9個が局)。すべて同じ大きさで 5×2 に並べる */
   .buttons { display: flex; flex-wrap: wrap; margin: -0.2em; }
   .radio button {
     font: inherit; color: var(--fg); background: transparent;
     border: 1px solid var(--fg); border-radius: 0.5em;
-    width: calc(20% - 0.4em); height: 3.4em; margin: 0.2em; padding: 0 0.15em;
+    width: calc(20% - 0.4em); height: 3.4em; margin: 0.2em; padding: 0 0.1em;
     display: flex; align-items: center; justify-content: center; text-align: center;
-    font-size: 0.8em; line-height: 1.2; overflow: hidden; overflow-wrap: break-word;
+    font-size: 0.8em; line-height: 1.15; overflow: hidden; white-space: normal;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
   }
   .radio button.on { background: var(--fg); color: var(--bg); }
   .radio .power { letter-spacing: 0.1em; }
+  /* 名前は .fit の中に入れ、ボタンに収まらない時だけ app.js(fitLabels)が字を小さくする */
+  .radio .fit { display: block; max-width: 100%; }
   .radio .state { text-align: center; margin-top: 0.6em; opacity: 0.75; min-height: 1.4em; }
 
-  /* 縦向き: 時刻の大きさは横幅で決める */
+  /* 縦向き: 時刻〜雨予報を上の空きの中央に、ラジオ(ボタン10個と状態の1行)を画面の下に置く */
   @media (orientation: portrait) {
-    :root { --T: min(19vw, 13vh); }
-    /* 縦向きのボタンは、余白を除いた画面幅いっぱいを使う */
-    .radio { max-width: none; font-size: 3.6vw; }
+    :root { --T: min(19vw, 12vh); }
+    main { justify-content: flex-start; }
+    .col { margin-top: auto; }
+    .radio { margin-top: auto; padding-top: 4vh; font-size: calc(3.6vw * var(--k)); }
   }
   /* 横向き: 左に時刻〜日の出・日の入り、右に雨予報・ラジオ */
   @media (orientation: landscape) {
     :root { --T: min(11vw, 24vh); }
-    main { flex-direction: row; }
-    .col { width: 50%; }
-    .col + .col { margin-top: 0; margin-left: 2vw; }
-    .radio { font-size: calc(var(--T) * 0.15); }
-    .rain .main { font-size: calc(var(--T) * 0.24); }
-    .rain .sub { font-size: calc(var(--T) * 0.15); }
+    /* 左の列に時刻〜日の出・日の入り、右の列の中央に雨予報とラジオ */
+    main {
+      display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto auto 1fr;
+      grid-column-gap: 3vw; align-items: center; justify-items: center;
+    }
+    .col { grid-column: 1; grid-row: 1 / 5; }
+    .rain { grid-column: 2; grid-row: 2; margin-top: 0; }
+    .radio { grid-column: 2; grid-row: 3; font-size: calc(var(--T) * 0.15 * var(--k)); }
+    .rain .main { font-size: calc(var(--T) * 0.24 * var(--k)); }
+    .rain .sub { font-size: calc(var(--T) * 0.15 * var(--k)); }
   }
   .debug { position: fixed; left: 4px; bottom: 4px; font: 11px monospace; opacity: 0.6; }
 </style>
@@ -136,19 +144,17 @@
       <div><span class="label">日の入り</span><span id="sunset">--:--</span></div>
     </div>
   </div>
-  <div class="col">
-    <section class="rain" aria-label="8時間以内の雨">
+  <section class="rain" aria-label="8時間以内の雨">
       <div class="main" id="rain-main">雨予報を取得しています…</div>
       <div class="sub" id="rain-sub"></div>
-    </section>
-    <section class="radio" aria-label="ラジオ">
+  </section>
+  <section class="radio" aria-label="ラジオ">
       <div class="buttons" id="buttons">
         <button type="button" class="power" id="power" aria-pressed="false">OFF</button>
       </div>
       <div class="state" id="radio-state"></div>
       <audio id="audio" preload="none"></audio>
     </section>
-  </div>
 </main>
 <noscript><p style="text-align:center">JavaScript を有効にしてください。</p></noscript>
 <script src="app.js"></script>
