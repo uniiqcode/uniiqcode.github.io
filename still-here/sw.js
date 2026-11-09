@@ -12,7 +12,8 @@ const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v4→v5(2026年11月): ラジオのボタンの名前を元の大きさに戻し、太字にした。
 // v5→v6(2026年11月): 横向きの文字を 125% にした。
 // 同じ版で: 雨予報の文を、かたまりの切れ目でだけ折り返すようにした。
-const CACHE_NAME = CACHE_PREFIX + 'v6';
+// v6→v7(2026年11月): 横向きで、ラジオ(状態の1行を含む)の下端を日の出・日の入りの下端にそろえた。
+const CACHE_NAME = CACHE_PREFIX + 'v7';
 
 const APP_SHELL = [
   './', 'index.html', 'app.js', 'manifest.json',

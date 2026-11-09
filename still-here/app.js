@@ -190,6 +190,7 @@
     var f = new Date(fetchedAt);
     $('rain-sub').textContent = '8時間以内の雨 ・ ' + f.getHours() + '時' + pad2(f.getMinutes()) + '分更新';
     renderSun(forecast);
+    alignRight();
   }
 
   function getPosition() {
@@ -321,6 +322,22 @@
     renderRadio();
   }
 
+  // ---- 横向き: 右の列(雨予報+ラジオ)の下端を、日の出・日の入りの下端にそろえる ----
+  // 描画された位置を実測し、右の列をまとめて上下にずらす(状態の1行も含めた下端で合わせる)。
+  function alignRight() {
+    var rain = document.querySelector('.rain'), radio = document.querySelector('.radio');
+    rain.style.transform = radio.style.transform = '';
+    if (window.innerWidth <= window.innerHeight) return; // 縦向きでは何もしない
+    var d = document.querySelector('.sun').getBoundingClientRect().bottom - radio.getBoundingClientRect().bottom;
+    var t = 'translateY(' + Math.round(d) + 'px)';
+    rain.style.transform = radio.style.transform = t;
+  }
+  var alignTimer = null;
+  function alignSoon() { clearTimeout(alignTimer); alignTimer = setTimeout(alignRight, 100); }
+  window.addEventListener('resize', alignSoon);
+  window.addEventListener('orientationchange', alignSoon);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignRight);
+
   // ---- 起動 --------------------------------------------------------------
   applyColor(new Date().getHours());
   buildTime();
@@ -328,6 +345,7 @@
   restoreForecast();
   loadDigits().then(function () { lastDigits = ''; renderTime(new Date()); });
   tick();
+  alignRight();
   setTimeout(function () { document.body.className = 'ready'; }, 50);
   refresh();
   resolvePls();
