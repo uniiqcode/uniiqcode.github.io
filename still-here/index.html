@@ -99,14 +99,13 @@
     border: 1px solid var(--fg); border-radius: 0.5em;
     width: calc(20% - 0.4em); height: 3.4em; margin: 0.2em; padding: 0 0.1em;
     display: flex; align-items: center; justify-content: center; text-align: center;
-    font-size: 0.8em; line-height: 1.15; overflow: hidden; white-space: normal;
+    font-size: calc(0.8em / var(--k)); font-weight: bold; line-height: 1.15; overflow: hidden; white-space: normal;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
   }
   .radio button.on { background: var(--fg); color: var(--bg); }
+  /* ボタンの名前は 150% にしない(元の大きさ)。かわりに太字。Shippori Mincho は太字のファイルが無いので、ブラウザが太らせて表示する */
   .radio .power { letter-spacing: 0.1em; }
-  /* 名前は .fit の中に入れ、ボタンに収まらない時だけ app.js(fitLabels)が字を小さくする */
-  .radio .fit { display: block; max-width: 100%; }
   .radio .state { text-align: center; margin-top: 0.6em; opacity: 0.75; min-height: 1.4em; }
 
   /* 縦向き: 時刻〜雨予報を上の空きの中央に、ラジオ(ボタン10個と状態の1行)を画面の下に置く */
