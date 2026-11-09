@@ -16,7 +16,8 @@ const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v7→v8(2026年11月): 18時を昼のグループ(明るい色)に入れた。
 // v8→v9(2026年11月): 時刻を上端と曜日の真ん中に独立させ、再生中の表示を局の名前だけにした。
 // v9→v10(2026年11月): 焼き付き対策のずらし、深夜の文字を暗く、日付と曜日を1行、雨の更新時刻を短くした。
-const CACHE_NAME = CACHE_PREFIX + 'v10';
+// v10→v11(2026年11月): 説明文(description・OGP・JSON-LD・manifest)を差し替えた。
+const CACHE_NAME = CACHE_PREFIX + 'v11';
 
 const APP_SHELL = [
   './', 'index.html', 'app.js', 'manifest.json',

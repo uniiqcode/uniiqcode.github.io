@@ -1,7 +1,7 @@
 {
   "name": "Still Here",
   "short_name": "Still Here",
-  "description": "古いスマートフォンを、時計・雨予報・ラジオとして置きっぱなしで使うアプリ",
+  "description": "古いスマホを、時計・雨予報・ラジオに",
   "id": "./",
   "start_url": "./",
   "scope": "./",
