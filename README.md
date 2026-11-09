@@ -24,6 +24,7 @@
 - `assets/og-image.png` … SNSでリンクを共有した時に出る画像（1200×630、ワードマーク）
 - `assets/logo/uniiqcode-u-3d.png` / `uniiqcode-u-3d-on-dark.png` … 立体のUマーク（1024×1024・背景透明）。白い背景用は黒に近いグレー、暗い背景用は明るいグレー。作り直す時は `tools/logo-3d/README.md`
 - `assets/icons/gyosu-sakaba.png` … 業スー酒場のアイコン（`uniiqcode/gyosu-sakaba` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
+- `assets/icons/konbini-24h.png` … コンビニ24H のアイコン（`uniiqcode/konbini-24h` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
 - 暗い背景では、CSS の `filter: invert(1)` で白にして使う
 
 ## 検索対策（SEO）

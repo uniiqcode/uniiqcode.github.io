@@ -8,3 +8,4 @@ Disallow: /docs/
 
 Sitemap: https://uniiqcode.com/sitemap.xml
 Sitemap: https://uniiqcode.com/gyosu-sakaba/sitemap.xml
+Sitemap: https://uniiqcode.com/konbini-24h/sitemap.xml
