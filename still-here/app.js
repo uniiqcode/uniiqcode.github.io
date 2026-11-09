@@ -316,7 +316,7 @@
       renderRadio();
       if (isOn) connect(); else disconnect();
     });
-    audio.addEventListener('playing', function () { if (isOn) setState('再生中 ' + STATIONS[selected].label + '(' + STATIONS[selected].name + ')'); });
+    audio.addEventListener('playing', function () { if (isOn) setState(STATIONS[selected].name); });
     audio.addEventListener('waiting', function () { if (isOn) setState('接続中…'); });
     audio.addEventListener('error', function () { if (isOn && audio.getAttribute('src')) setState('つながりませんでした'); });
     renderRadio();

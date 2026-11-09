@@ -14,7 +14,8 @@ const CACHE_PREFIX = 'uniiqcode-still-here-';
 // 同じ版で: 雨予報の文を、かたまりの切れ目でだけ折り返すようにした。
 // v6→v7(2026年11月): 横向きで、ラジオ(状態の1行を含む)の下端を日の出・日の入りの下端にそろえた。
 // v7→v8(2026年11月): 18時を昼のグループ(明るい色)に入れた。
-const CACHE_NAME = CACHE_PREFIX + 'v8';
+// v8→v9(2026年11月): 時刻を上端と曜日の真ん中に独立させ、再生中の表示を局の名前だけにした。
+const CACHE_NAME = CACHE_PREFIX + 'v9';
 
 const APP_SHELL = [
   './', 'index.html', 'app.js', 'manifest.json',
