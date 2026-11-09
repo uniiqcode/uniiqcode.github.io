@@ -31,13 +31,26 @@
     雨予報・ラジオも同じ --bg / --fg だけを使う。
 -->
 <style>
+  /* 文字は clock01.html(niisan.tv)と同じ Shippori Mincho。数字の時刻だけ travelフォント(SVG)。
+     latin を後に書く: ブラウザは後の宣言から unicode-range を見るので、英数字だけなら軽い latin で済む */
+  @font-face {
+    font-family: "Shippori Mincho"; font-style: normal; font-weight: 400; font-display: swap;
+    src: url("fonts/shippori-mincho-japanese-400-normal.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Shippori Mincho"; font-style: normal; font-weight: 400; font-display: swap;
+    src: url("fonts/shippori-mincho-latin-400-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+      U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+      U+FEFF, U+FFFD;
+  }
   :root { --bg: #12161A; --fg: #ECE8DF; --T: 20vw; }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
     background: var(--bg);
     color: var(--fg);
-    font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
+    font-family: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
     -webkit-text-size-adjust: 100%;
     overflow-x: hidden;
   }

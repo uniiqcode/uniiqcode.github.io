@@ -53,7 +53,7 @@ clock01.html（niisan.tv の「時①」）のレイアウトをもとにする�
 - 時刻は `HH:MM` と秒。**秒の数字だけ時分の70%の大きさにして、時分と下揃えにする。** 分と秒の間にコロンは入れない。
 - **数字だけ travelフォントの SVG を使う**（`niisan-tv` の `frontend/assets/numerals/TN-0〜9-v01.svg`。`fill="currentColor"` なので文字色が効く）。
   - 数字ごとに横幅が違うため、桁ごとに固定幅の枠に入れて中央にそろえる（clock01 と同じ方式）。コロンは点2つで描く。
-- 曜日・日付・日の出・日の入りは通常の文字で表示する。
+- 曜日・日付・日の出・日の入り・雨予報・ラジオなど、時刻の数字以外の文字はすべて clock01.html と同じ **Shippori Mincho**（`still-here/fonts/`。niisan.tv の `frontend/assets/shippori-mincho/` を複製。OFL）。日本語用は約1.4MBあるが、`sw.js` で端末に保存するので読み込みは初回だけ。
 - 日の出・日の入りは、雨予報と同じ Open-Meteo の応答（`daily` の `sunrise` / `sunset`）から出す。自前の計算はしない。
 
 ## 5. 雨予報

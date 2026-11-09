@@ -6,7 +6,8 @@
  */
 const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v1(2026年11月): 初版。
-const CACHE_NAME = CACHE_PREFIX + 'v1';
+// v1→v2(2026年11月): 文字を clock01 と同じ Shippori Mincho にした(fonts/ を追加)。
+const CACHE_NAME = CACHE_PREFIX + 'v2';
 
 const APP_SHELL = [
   './', 'index.html', 'app.js', 'manifest.json',
@@ -14,6 +15,7 @@ const APP_SHELL = [
   'numerals/TN-0-v01.svg', 'numerals/TN-1-v01.svg', 'numerals/TN-2-v01.svg', 'numerals/TN-3-v01.svg',
   'numerals/TN-4-v01.svg', 'numerals/TN-5-v01.svg', 'numerals/TN-6-v01.svg', 'numerals/TN-7-v01.svg',
   'numerals/TN-8-v01.svg', 'numerals/TN-9-v01.svg',
+  'fonts/shippori-mincho-latin-400-normal.woff2', 'fonts/shippori-mincho-japanese-400-normal.woff2',
 ];
 
 self.addEventListener('install', (e) => {
