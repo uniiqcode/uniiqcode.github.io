@@ -23,12 +23,12 @@
   // 基準は niisan.tv の Traveler Colors(昼 #F5F3EE / #2B2D30、夜 #12161A / #ECE8DF)。
   // 夜明け(5〜7時)と夕暮れ(16〜18時)をつなぐ色を足している。6〜18時が明るい「昼のグループ」、19〜5時が暗い「夜のグループ」。どの行も文字と背景の差が十分にあること。
   var COLORS = [
-    ['#12161A', '#ECE8DF'], //  0 深夜
-    ['#111519', '#E8E4DB'], //  1
-    ['#101418', '#E4E0D7'], //  2
-    ['#11161B', '#E6E2D9'], //  3
-    ['#151B23', '#E9E5DC'], //  4 夜明け前
-    ['#1F2A36', '#EEEAE1'], //  5 藍の夜明け
+    ['#12161A', '#A8A49C'], //  0 深夜(0〜5時は寝室向けに文字を暗くする)
+    ['#111519', '#8F8B84'], //  1
+    ['#101418', '#86837C'], //  2 いちばん暗い
+    ['#11161B', '#8F8B84'], //  3
+    ['#151B23', '#A8A49C'], //  4 夜明け前
+    ['#1F2A36', '#C9C5BC'], //  5 藍の夜明け
     ['#D8DCE0', '#24282E'], //  6 白む空
     ['#E9E8E3', '#2A2C30'], //  7 朝
     ['#F1EFEA', '#2B2D30'], //  8
@@ -110,14 +110,25 @@
     var key = now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate();
     if (key === lastDay) return;
     lastDay = key;
-    $('weekday').textContent = WEEK[now.getDay()] + '曜日';
-    $('date').textContent = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
+    $('date').textContent = (now.getMonth() + 1) + '月' + now.getDate() + '日 ' + WEEK[now.getDay()] + '曜日';
     if (forecast) renderSun(forecast);
+  }
+
+  // ---- 焼き付き対策: 1時間ごとに画面全体を数ピクセルずらす ------------------
+  // 同じ配置を何か月も点けっぱなしにすると、有機ELなどで文字の跡が残るため。見た目はほぼ変わらない。
+  var SHIFTS = [[0, 0], [4, 2], [-3, 4], [5, -3], [-4, -2], [2, 5], [-5, 1], [3, -4], [-2, -5], [1, 3], [-1, -3], [4, 4]];
+  var shiftedHour = -1;
+  function applyShift(hour) {
+    if (hour === shiftedHour) return;
+    shiftedHour = hour;
+    var d = SHIFTS[hour % SHIFTS.length];
+    document.querySelector('main').style.transform = 'translate(' + d[0] + 'px,' + d[1] + 'px)';
   }
 
   function tick() {
     var now = new Date();
     applyColor(now.getHours());
+    applyShift(now.getHours());
     renderTime(now);
     renderDate(now);
     setTimeout(tick, 1000 - (Date.now() % 1000) + 10);
@@ -188,7 +199,7 @@
       box.appendChild(sp);
     });
     var f = new Date(fetchedAt);
-    $('rain-sub').textContent = '8時間以内の雨 ・ ' + f.getHours() + '時' + pad2(f.getMinutes()) + '分更新';
+    $('rain-sub').textContent = f.getHours() + ':' + pad2(f.getMinutes()) + '更新';
     renderSun(forecast);
     alignRight();
   }
@@ -226,7 +237,7 @@
       renderForecast();
     }).catch(function (e) {
       if (forecast) {
-        $('rain-sub').textContent = $('rain-sub').textContent.replace(/(・ 更新できません)?$/, ' ・ 更新できません');
+        $('rain-sub').textContent = $('rain-sub').textContent.replace(/( ・ 更新できません)?$/, ' ・ 更新できません');
       } else {
         $('rain-main').textContent = e.message || '雨予報を取得できませんでした';
       }
