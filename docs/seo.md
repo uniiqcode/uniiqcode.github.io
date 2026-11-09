@@ -16,6 +16,7 @@
 | 蘇州 | `https://uniiqcode.com/games/suzhou/` | 蘇州｜無料・広告なしの麻雀牌パズル | 同上 |
 | ここの天気 | `https://uniiqcode.com/weather/` | ここの天気｜今いる場所の雨と気温 | `WebApplication`（UtilitiesApplication） |
 | 業スー酒場 | `https://uniiqcode.com/gyosu-sakaba/` | （別のリポジトリ。`uniiqcode/gyosu-sakaba` の `docs/seo.md`） | `ItemList` |
+| コンビニ24H | `https://uniiqcode.com/konbini-24h/`（日本語・韓国語・繁体字・英語） | （別のリポジトリ。`uniiqcode/konbini-24h` の `docs/seo.md`） | `ItemList`＋`VideoObject` |
 
 ## 入れたもの（スキルの手順との対応）
 
