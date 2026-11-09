@@ -166,19 +166,27 @@
       slotsR = data.hourly.time.map(function (t, i) { var e = parseLocal(t); return { start: new Date(e.getTime() - 3600000), end: e, mm: data.hourly.precipitation[i] }; })
         .filter(function (s) { return s.mm != null && s.end > now && s.start < end; });
     }
-    if (!slotsR.length) return 'データがありません';
+    if (!slotsR.length) return ['データがありません'];
     var wet = function (s) { return s.mm >= RAIN_MIN; };
     if (wet(slotsR[0])) {
       var dry = slotsR.filter(function (s) { return !wet(s); })[0];
-      return dry ? 'いま雨。' + hmUTC(dry.start) + 'ごろ止む見込み' : 'いま雨。8時間以内は止まない見込み';
+      return dry ? ['いま雨。', hmUTC(dry.start) + 'ごろ止む見込み'] : ['いま雨。', '8時間以内は止まない見込み'];
     }
     var first = slotsR.filter(wet)[0];
-    return first ? hmUTC(first.start) + 'ごろ雨が降り始める見込み' : '8時間以内は雨の予想なし';
+    return first ? [hmUTC(first.start) + 'ごろ', '雨が降り始める見込み'] : ['8時間以内は', '雨の予想なし'];
   }
 
   function renderForecast() {
     if (!forecast) return;
-    $('rain-main').textContent = rainText(forecast);
+    // 文を意味のかたまりごとに分け、2行になる時はかたまりの切れ目で折り返す
+    var box = $('rain-main');
+    box.innerHTML = '';
+    rainText(forecast).forEach(function (t) {
+      var sp = document.createElement('span');
+      sp.className = 'chunk';
+      sp.textContent = t;
+      box.appendChild(sp);
+    });
     var f = new Date(fetchedAt);
     $('rain-sub').textContent = '8時間以内の雨 ・ ' + f.getHours() + '時' + pad2(f.getMinutes()) + '分更新';
     renderSun(forecast);

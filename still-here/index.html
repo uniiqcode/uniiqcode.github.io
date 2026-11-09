@@ -88,6 +88,7 @@
   /* 雨予報(文字のみ) */
   .rain { text-align: center; width: 100%; margin-top: 5vh; }
   .rain .main { font-size: calc(var(--T) * 0.2 * var(--k)); line-height: 1.4; }
+  .rain .chunk { display: inline-block; }
   .rain .sub { font-size: calc(var(--T) * 0.13 * var(--k)); opacity: 0.65; margin-top: 0.3em; line-height: 1.5; }
 
   /* ラジオ: 背景・文字色は他と同じ。選ばれたボタンだけ色を反転 */
@@ -118,6 +119,8 @@
   /* 横向き: 左に時刻〜日の出・日の入り、右に雨予報・ラジオ */
   @media (orientation: landscape) {
     :root { --T: min(11vw, 24vh); }
+    /* 横向きは文字の倍率を 125% にする(時刻とボタンの名前は変わらない) */
+    :root { --k: 1.25; }
     /* 左の列に時刻〜日の出・日の入り、右の列の中央に雨予報とラジオ */
     main {
       display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto auto 1fr;

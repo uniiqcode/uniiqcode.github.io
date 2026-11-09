@@ -10,7 +10,9 @@ const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v2→v3(2026年11月): ラジオを9局にし、ボタンを ON/OFF+9局の10個(5×2・同じ大きさ・小分類名)にした。
 // v3→v4(2026年11月): 縦向きでラジオを画面の下に置き、時刻以外の文字を150%にした。
 // v4→v5(2026年11月): ラジオのボタンの名前を元の大きさに戻し、太字にした。
-const CACHE_NAME = CACHE_PREFIX + 'v5';
+// v5→v6(2026年11月): 横向きの文字を 125% にした。
+// 同じ版で: 雨予報の文を、かたまりの切れ目でだけ折り返すようにした。
+const CACHE_NAME = CACHE_PREFIX + 'v6';
 
 const APP_SHELL = [
   './', 'index.html', 'app.js', 'manifest.json',
