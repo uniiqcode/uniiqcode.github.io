@@ -73,37 +73,38 @@ clock01.html（niisan.tv の「時①」）のレイアウトをもとにする�
 
 ### 操作
 
-- ボタンは **ON/OFF** と **選局10個**。
-- 選局ボタンを押すと、その局を記憶する（その端末のブラウザに保存）。
-- ON にすると、記憶している局につないで再生する。まだ一度も選んでいなければ1番の局を流す。
+- ボタンは **10個**。先頭が **ON/OFF**、残りの9個が局。独立した ON/OFF ボタンは置かない。
+- 局のボタンを押すと、その局を記憶する（その端末のブラウザに保存）。
+- ON にすると、記憶している局につないで再生する。まだ一度も選んでいなければ先頭の局（Ambient-Chillout）を流す。
 - OFF にすると、再生を止めて接続を切る。
-- 再生中に別の選局ボタンを押したら、すぐその局に切り替える。
-
-### 局（当面10局）
-
-niisan.tv の `stations.txt` から選んだ。https の局だけを使う（uniiqcode.com は https なので、`http://` の局はブラウザが再生を止める）。FLAC の局は、iPhone で再生できないことが多く通信量も大きいので使わない。
-
-| # | 局 | ジャンル | 形式 | URL（stations.txt） |
-|---|---|---|---|---|
-| 1 | Groove Salad（SomaFM） | Electronic | MP3 256k | `https://somafm.com/groovesalad256.pls` |
-| 2 | Left Coast 70s（SomaFM） | Pop-Rock | MP3 320k | `https://somafm.com/seventies320.pls` |
-| 3 | WALM Classic Vinyl HD | Pop | MP3 320k | `https://icecast.walmradio.com:8443/classic` |
-| 4 | PureClassix Radio | Pop | MP3 | `https://mscp4.live-streams.nl:8142/live.mp3` |
-| 5 | SmoothJazz.com Global | Jazz | MP3 256k | `https://www.smoothjazz.com/streams/smoothjazz_256.pls` |
-| 6 | SmoothJazz.com.pl | Jazz | MP3 320k | `https://bcast.vigormultimedia.com:48888/sjcompl320mp3` |
-| 7 | RelaxingJazz.com | Jazz | MP3 320k | `https://443-1.autopo.st/171/stream/3/` |
-| 8 | SmoothLounge.com | New-Age | MP3 256k | `https://www.smoothjazz.com/streams/smoothlounge_256.pls` |
-| 9 | Bossa Beyond（SomaFM） | World | MP3 256k | `https://somafm.com/bossa256.pls` |
-| 10 | Naim Classical | Classical | AAC 320k | `https://mscp3.live-streams.nl:8252/class-high.aac` |
-
-- `.pls` はストリームそのものではなくプレイリストなので、`<audio>` では直接再生できない。アプリには候補のストリームURLを直接書き、起動時に `.pls` が読めればその中身（`File1=`）で置き換える（相手のサイトが許可していなければ読めないので、候補URLのまま）。候補URLは未確認（§8）。
-  - SomaFM: `https://ice1.somafm.com/{groovesalad-256-mp3, seventies-320-mp3, bossa-256-mp3}`
-  - SmoothJazz.com: `https://smoothjazz.cdnstream1.com/2585_320.mp3`（Global）、`2586_320.mp3`（Lounge）
+- 再生中に別の局のボタンを押したら、すぐその局に切り替える。
 
 ### 画面
 
-- ON/OFF ボタンの下に状態（接続中… / 再生中 局名 / つながりませんでした）を出す。
-- 選局ボタンは 5×2。番号と局名。選ばれているボタンだけ文字色と背景色を反転する。
+- 10個のボタンはすべて同じ大きさで、横に5つ・2段に並べる。縦向きでは、余白を除いた画面幅いっぱいを使う。
+- 局のボタンには、局の名前ではなく **stations.txt の小分類** を出す。番号は出さない。Smooth-Jazz は2局あるので「Smooth-Jazz 1」「Smooth-Jazz 2」とする。
+- ON/OFF ボタンは、ON の時と選ばれている局のボタンだけ、文字色と背景色を反転する。
+- ボタンの下に状態（接続中… / 再生中 小分類(局名) / つながりませんでした）を出す。
+
+### 局（当面9局）
+
+niisan.tv の `stations.txt` から選んだ。https の局だけを使う（uniiqcode.com は https なので、`http://` の局はブラウザが再生を止める）。FLAC の局は、iPhone で再生できないことが多く通信量も大きいので使わない。
+
+| ボタン | 局 | 大分類 | URL（stations.txt） |
+|---|---|---|---|
+| Ambient-Chillout | Groove Salad（SomaFM） | Electronic | `https://somafm.com/groovesalad256.pls` |
+| Classic-Rock | Left Coast 70s（SomaFM） | Pop-Rock | `https://somafm.com/seventies320.pls` |
+| Classic-Vinyl | WALM Classic Vinyl HD | Pop | `https://icecast.walmradio.com:8443/classic` |
+| Pop-Europe | PureClassix Radio | Pop | `https://mscp4.live-streams.nl:8142/live.mp3` |
+| Smooth-Jazz 1 | SmoothJazz.com.pl | Jazz | `https://bcast.vigormultimedia.com:48888/sjcompl320mp3` |
+| Smooth-Jazz 2 | RelaxingJazz.com | Jazz | `https://443-1.autopo.st/171/stream/3/` |
+| Meditation | SmoothLounge.com | New-Age-Healing | `https://www.smoothjazz.com/streams/smoothlounge_256.pls` |
+| Bossa-Nova | Bossa Beyond（SomaFM） | World-Music | `https://somafm.com/bossa256.pls` |
+| Classical-Audiophile | Naim Classical | Classical | `https://mscp3.live-streams.nl:8252/class-high.aac` |
+
+- `.pls` はストリームそのものではなくプレイリストなので、`<audio>` では直接再生できない。アプリには候補のストリームURLを直接書き、起動時に `.pls` が読めればその中身（`File1=`）で置き換える（相手のサイトが許可していなければ読めないので、候補URLのまま）。候補URLは未確認（§8）。
+  - SomaFM: `https://ice1.somafm.com/{groovesalad-256-mp3, seventies-320-mp3, bossa-256-mp3}`
+  - SmoothLounge: `https://smoothjazz.cdnstream1.com/2586_320.mp3`
 
 ## 6.5 ホーム画面に追加
 
@@ -116,13 +117,14 @@ niisan.tv の `stations.txt` から選んだ。https の局だけを使う（uni
 - 名前は「Still Here」。古い機種がまだ使える、置きっぱなしで流し続ける、の意味を込めた。
 - 色は1時間ごとの固定色にした（連続的な計算はしない）。
 - 時刻は数字だけ travelフォントにした。
-- ラジオは https の局だけ。FLAC は外した。当面10局。
+- ラジオは https の局だけ。FLAC は外した。SmoothJazz.com Global も外して9局。
+- ラジオのボタンは ON/OFF を含めて10個、小分類の名前で出す。
 - 秒を出す。秒の数字は70%の大きさで下揃え。
 - ホーム画面に追加して使う。
 
 ## 8. 未決
 
 - 24色の表の中身（たたき台を確認してもらう）。
-- `.pls` の5局（1・2・5・8・9）の候補URLが実機で鳴るか。開発環境からは somafm.com・smoothjazz.com に接続できず未確認。
+- `.pls` の4局（Ambient-Chillout・Classic-Rock・Meditation・Bossa-Nova）の候補URLが実機で鳴るか。開発環境からは somafm.com・smoothjazz.com に接続できず未確認。
 - 画面を点けっぱなしにする仕組み（Wake Lock）は iOS15 では使えないので、端末の自動ロックの設定で対応する想定。
 - トップページへのアイコン追加と `sitemap.xml`（実機確認のあとに）。

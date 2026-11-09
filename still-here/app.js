@@ -234,19 +234,19 @@
   // ---- ラジオ ------------------------------------------------------------
   // url: 再生するストリーム。pls があれば、起動時にその中身(File1=)を読んで url を置き換える
   // (相手のサイトが許せば。読めなければ url のまま)。
+  // label: ボタンに出す名前(stations.txt の小分類)
   var STATIONS = [
-    { name: 'Groove Salad', genre: 'Electronic', url: 'https://ice1.somafm.com/groovesalad-256-mp3', pls: 'https://somafm.com/groovesalad256.pls' },
-    { name: 'Left Coast 70s', genre: 'Pop-Rock', url: 'https://ice1.somafm.com/seventies-320-mp3', pls: 'https://somafm.com/seventies320.pls' },
-    { name: 'WALM Classic Vinyl', genre: 'Pop', url: 'https://icecast.walmradio.com:8443/classic' },
-    { name: 'PureClassix', genre: 'Pop', url: 'https://mscp4.live-streams.nl:8142/live.mp3' },
-    { name: 'SmoothJazz Global', genre: 'Jazz', url: 'https://smoothjazz.cdnstream1.com/2585_320.mp3', pls: 'https://www.smoothjazz.com/streams/smoothjazz_256.pls' },
-    { name: 'SmoothJazz.pl', genre: 'Jazz', url: 'https://bcast.vigormultimedia.com:48888/sjcompl320mp3' },
-    { name: 'RelaxingJazz', genre: 'Jazz', url: 'https://443-1.autopo.st/171/stream/3/' },
-    { name: 'SmoothLounge', genre: 'New-Age', url: 'https://smoothjazz.cdnstream1.com/2586_320.mp3', pls: 'https://www.smoothjazz.com/streams/smoothlounge_256.pls' },
-    { name: 'Bossa Beyond', genre: 'World', url: 'https://ice1.somafm.com/bossa-256-mp3', pls: 'https://somafm.com/bossa256.pls' },
-    { name: 'Naim Classical', genre: 'Classical', url: 'https://mscp3.live-streams.nl:8252/class-high.aac' }
+    { label: 'Ambient-Chillout', name: 'Groove Salad (SomaFM)', url: 'https://ice1.somafm.com/groovesalad-256-mp3', pls: 'https://somafm.com/groovesalad256.pls' },
+    { label: 'Classic-Rock', name: 'Left Coast 70s (SomaFM)', url: 'https://ice1.somafm.com/seventies-320-mp3', pls: 'https://somafm.com/seventies320.pls' },
+    { label: 'Classic-Vinyl', name: 'WALM Classic Vinyl HD', url: 'https://icecast.walmradio.com:8443/classic' },
+    { label: 'Pop-Europe', name: 'PureClassix Radio', url: 'https://mscp4.live-streams.nl:8142/live.mp3' },
+    { label: 'Smooth-Jazz\u00a01', name: 'SmoothJazz.com.pl', url: 'https://bcast.vigormultimedia.com:48888/sjcompl320mp3' },
+    { label: 'Smooth-Jazz\u00a02', name: 'RelaxingJazz.com', url: 'https://443-1.autopo.st/171/stream/3/' },
+    { label: 'Meditation', name: 'SmoothLounge.com', url: 'https://smoothjazz.cdnstream1.com/2586_320.mp3', pls: 'https://www.smoothjazz.com/streams/smoothlounge_256.pls' },
+    { label: 'Bossa-Nova', name: 'Bossa Beyond (SomaFM)', url: 'https://ice1.somafm.com/bossa-256-mp3', pls: 'https://somafm.com/bossa256.pls' },
+    { label: 'Classical-Audiophile', name: 'Naim Classical', url: 'https://mscp3.live-streams.nl:8252/class-high.aac' }
   ];
-  var STORE_ST = 'still-here-station-v1';
+  var STORE_ST = 'still-here-station-v2'; // v2: 局を9局にした(番号の意味が変わったため)
   var audio = $('audio');
   var selected = 0, isOn = false, buttons = [];
   try { var saved = parseInt(localStorage.getItem(STORE_ST), 10); if (saved >= 0 && saved < STATIONS.length) selected = saved; } catch (e) {}
@@ -267,7 +267,7 @@
     buttons.forEach(function (b, i) { b.className = i === selected ? 'on' : ''; b.setAttribute('aria-pressed', i === selected ? 'true' : 'false'); });
     var p = $('power');
     p.textContent = isOn ? 'ON' : 'OFF';
-    p.className = isOn ? 'on' : '';
+    p.className = isOn ? 'power on' : 'power';
     p.setAttribute('aria-pressed', isOn ? 'true' : 'false');
   }
 
@@ -286,13 +286,13 @@
   }
 
   function buildRadio() {
-    var box = $('stations');
+    var box = $('buttons');
     STATIONS.forEach(function (st, i) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.innerHTML = (i + 1) + '<small></small>';
-      b.querySelector('small').textContent = st.name;
-      b.title = st.name + '(' + st.genre + ')';
+      // ハイフンの後ろで折り返せるようにする(長い名前が2行になる)
+      b.innerHTML = st.label.replace(/-/g, '-<wbr>');
+      b.title = st.name;
       b.addEventListener('click', function () {
         selected = i;
         try { localStorage.setItem(STORE_ST, String(i)); } catch (e) {}
@@ -307,7 +307,7 @@
       renderRadio();
       if (isOn) connect(); else disconnect();
     });
-    audio.addEventListener('playing', function () { if (isOn) setState('再生中 ' + STATIONS[selected].name); });
+    audio.addEventListener('playing', function () { if (isOn) setState('再生中 ' + STATIONS[selected].label + '(' + STATIONS[selected].name + ')'); });
     audio.addEventListener('waiting', function () { if (isOn) setState('接続中…'); });
     audio.addEventListener('error', function () { if (isOn && audio.getAttribute('src')) setState('つながりませんでした'); });
     renderRadio();

@@ -7,7 +7,8 @@
 const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v1(2026年11月): 初版。
 // v1→v2(2026年11月): 文字を clock01 と同じ Shippori Mincho にした(fonts/ を追加)。
-const CACHE_NAME = CACHE_PREFIX + 'v2';
+// v2→v3(2026年11月): ラジオを9局にし、ボタンを ON/OFF+9局の10個(5×2・同じ大きさ・小分類名)にした。
+const CACHE_NAME = CACHE_PREFIX + 'v3';
 
 const APP_SHELL = [
   './', 'index.html', 'app.js', 'manifest.json',

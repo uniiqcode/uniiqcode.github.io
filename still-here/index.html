@@ -91,25 +91,26 @@
 
   /* ラジオ: 背景・文字色は他と同じ。選ばれたボタンだけ色を反転 */
   .radio { margin-top: 4vh; width: 100%; max-width: 34em; font-size: calc(var(--T) * 0.13); }
+  /* 10個のボタン(先頭が ON/OFF、残り9個が局)。すべて同じ大きさで 5×2 に並べる */
+  .buttons { display: flex; flex-wrap: wrap; margin: -0.2em; }
   .radio button {
     font: inherit; color: var(--fg); background: transparent;
     border: 1px solid var(--fg); border-radius: 0.5em;
-    padding: 0.55em 0.2em; margin: 0; cursor: pointer;
+    width: calc(20% - 0.4em); height: 3.4em; margin: 0.2em; padding: 0 0.15em;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 0.8em; line-height: 1.2; overflow: hidden; overflow-wrap: break-word;
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
   }
-  body.ready .radio button { transition: background-color 2s linear, color 2s linear, border-color 2s linear; }
   .radio button.on { background: var(--fg); color: var(--bg); }
-  .power { display: flex; flex-direction: column; align-items: center; }
-  .power button { width: 6.5em; letter-spacing: 0.1em; }
-  .power .state { margin-top: 0.4em; opacity: 0.75; min-height: 1.4em; }
-  .stations { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 0.8em; }
-  .stations button { width: calc(20% - 0.4em); margin: 0.2em; font-size: 0.85em; line-height: 1.25; }
-  .stations button small { display: block; font-size: 0.8em; opacity: 0.7; }
+  .radio .power { letter-spacing: 0.1em; }
+  .radio .state { text-align: center; margin-top: 0.6em; opacity: 0.75; min-height: 1.4em; }
 
   /* 縦向き: 時刻の大きさは横幅で決める */
   @media (orientation: portrait) {
     :root { --T: min(19vw, 13vh); }
-    .stations button { width: calc(20% - 0.4em); }
+    /* 縦向きのボタンは、余白を除いた画面幅いっぱいを使う */
+    .radio { max-width: none; font-size: 3.6vw; }
   }
   /* 横向き: 左に時刻〜日の出・日の入り、右に雨予報・ラジオ */
   @media (orientation: landscape) {
@@ -141,11 +142,10 @@
       <div class="sub" id="rain-sub"></div>
     </section>
     <section class="radio" aria-label="ラジオ">
-      <div class="power">
-        <button type="button" id="power" aria-pressed="false">OFF</button>
-        <span class="state" id="radio-state"></span>
+      <div class="buttons" id="buttons">
+        <button type="button" class="power" id="power" aria-pressed="false">OFF</button>
       </div>
-      <div class="stations" id="stations"></div>
+      <div class="state" id="radio-state"></div>
       <audio id="audio" preload="none"></audio>
     </section>
   </div>
