@@ -5,7 +5,7 @@ niisan.tv と uniiqcode で作ってきたもののダイジェスト版にあ�
 
 - 公開URL: https://uniiqcode.com/still-here/
 - 置き場所: このリポジトリの `still-here/`
-- 状態: 試作版を作成（2026-11-09）。まだトップページ・サイトマップには載せていない
+- 状態: 公開中。トップページ・サイトマップに載せた（2026-11-10）
 
 ## 1. 前提
 
@@ -148,6 +148,4 @@ niisan.tv の `stations.txt` から選んだ。https の局だけを使う（uni
 
 ## 8. 未決
 
-- `.pls` の4局（Ambient-Chillout・Classic-Rock・Meditation・Bossa-Nova）の候補URLが実機で鳴るか。開発環境からは somafm.com・smoothjazz.com に接続できず未確認。
 - 画面を点けっぱなしにする仕組み（Wake Lock）は iOS15 では使えないので、端末の自動ロックの設定で対応する想定。
-- トップページへのアイコン追加と `sitemap.xml`（実機確認のあとに）。
