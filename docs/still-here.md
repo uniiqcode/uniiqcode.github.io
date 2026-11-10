@@ -122,7 +122,11 @@ niisan.tv の `stations.txt` から選んだ。https の局だけを使う（uni
 
 ## 6.5 ホーム画面に追加
 
-- `manifest.json`（standalone）、アイコン（`icons/`。travelフォントの「12」と琥珀の点）、`apple-touch-icon` を用意した。
+- `manifest.json`（standalone）、アイコン（`icons/`）、`apple-touch-icon` を用意した。
+- アイコン: 木のスタンドに立つ小さめのスマホと、両側のミニスピーカー。画面に琥珀色に光る「12」。レトロ調で、スマホが余生を楽しんでいる感じ（2026-11-10）。
+  - 元画像は ChatGPT で生成し、浮かんでいた音符を消して採用した（Claude・Gemini の案と比べて選んだ）。
+  - 元画像（音符を消したもの、1254px）: `docs/still-here/icon-source.webp`。サイズを作り直す時はここから。
+  - 512・192・180（apple-touch-icon）・32（favicon）px と、ホーム画面で丸く切られる用の `icon-maskable-*.png`（絵を78%に縮めて地の色の上に置いたもの）。
 - オフライン用の `sw.js` は自分のファイルだけを保存する。ファイルを変えたら `CACHE_NAME` を上げる。
 - 「ホーム画面に追加」ボタンは共通部品 `assets/a2hs.js` を使う。
 
