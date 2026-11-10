@@ -39,17 +39,21 @@
   }
   body { margin: 0; background: var(--bg); }
   main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
-  /* Uマーク＋文字ロゴを横に並べる */
-  h1 { margin: 0 0 40px; line-height: 0; display: flex; align-items: center; gap: 14px; }
+  /* Uマーク（シール）＋文字ロゴを横に並べる。
+     シールの中の「U」の上下と、文字ロゴの「U」の上下をそろえる（2026年11月、niisan指定の案A）。
+     測った位置（SVGの座標）: Uマーク(高さ216)の U は 66〜209、文字ロゴ(高さ194)の U は 23〜154。
+     文字ロゴ 48px のとき、Uマークを 49px・シールを 68px にし、文字ロゴを 18.8px 下げると一致する。
+     全体の幅は 296px。画面がそれより狭い時は、--k（1px あたり）を縮めて、全部を同じ割合で小さくする */
+  h1 { --k: min(1px, calc((100vw - 32px) / 296.3)); margin: 0 0 40px; line-height: 0;
+       display: flex; align-items: flex-start; gap: calc(var(--k) * 14); }
   h1 img { display: block; width: auto; }
   /* Uマークは白い正方形のシールにして、ページに貼ったように少し影をつける */
-  h1 .sticker { flex: none; width: 64px; height: 64px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
-                background: #fff; border-radius: 10px;
+  h1 .sticker { flex: none; width: calc(var(--k) * 68); height: calc(var(--k) * 68); box-sizing: border-box;
+                display: flex; align-items: center; justify-content: center;
+                background: #fff; border-radius: calc(var(--k) * 10);
                 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), 0 3px 8px rgba(0, 0, 0, 0.12); }
-  h1 .mark { height: 46px; }
-  /* 文字ロゴは、文字の本体（大文字の上から並びの底まで。「i」の点と「q」の下は除く）の上下の真ん中を、
-     シールの上下の真ん中にそろえる。画像の真ん中より本体の真ん中が約2px上にあるので、その分だけ下げる */
-  h1 .wordmark { height: 48px; position: relative; top: 2px; min-width: 0; max-width: calc(100% - 78px); object-fit: contain; object-position: left center; }
+  h1 .mark { height: calc(var(--k) * 49); }
+  h1 .wordmark { height: calc(var(--k) * 48); margin-top: calc(var(--k) * 18.8); }
   /* ダークモードでは文字ロゴだけ白に。シールは白地に黒のまま（貼ったシールなので色は変わらない） */
   @media (prefers-color-scheme: dark) {
     h1 .wordmark { filter: invert(1); }
