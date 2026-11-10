@@ -18,7 +18,8 @@ const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v9→v10(2026年11月): 焼き付き対策のずらし、深夜の文字を暗く、日付と曜日を1行、雨の更新時刻を短くした。
 // v10→v11(2026年11月): 説明文(description・OGP・JSON-LD・manifest)を差し替えた。
 // v11→v12(2026年11月): アイコンを差し替えた(スタンドのスマホと両側のスピーカー)。見出し(h1)・共有用の画像を足した。
-const CACHE_NAME = CACHE_PREFIX + 'v12';
+// v12→v13(2026年11月): ON/OFF ボタンに SLEEP(60分で自動 OFF)を足した。
+const CACHE_NAME = CACHE_PREFIX + 'v13';
 
 const APP_SHELL = [
   './', 'index.html', 'app.js', 'manifest.json',
