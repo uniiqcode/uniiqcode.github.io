@@ -40,15 +40,16 @@
   body { margin: 0; background: var(--bg); }
   main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
   /* Uマーク＋文字ロゴを横に並べる */
-  h1 { margin: 0 0 40px; line-height: 0; display: flex; align-items: flex-end; gap: 14px; }
+  h1 { margin: 0 0 40px; line-height: 0; display: flex; align-items: center; gap: 14px; }
   h1 img { display: block; width: auto; }
   /* Uマークは白い正方形のシールにして、ページに貼ったように少し影をつける */
   h1 .sticker { flex: none; width: 64px; height: 64px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
                 background: #fff; border-radius: 10px;
                 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), 0 3px 8px rgba(0, 0, 0, 0.12); }
   h1 .mark { height: 46px; }
-  /* 文字ロゴは「q」の下に伸びる分だけ下げて、シールの底と文字の並び（ベースライン）をそろえる */
-  h1 .wordmark { height: 48px; margin-bottom: -10px; min-width: 0; max-width: calc(100% - 78px); object-fit: contain; object-position: left bottom; }
+  /* 文字ロゴは、文字の本体（大文字の上から並びの底まで。「i」の点と「q」の下は除く）の上下の真ん中を、
+     シールの上下の真ん中にそろえる。画像の真ん中より本体の真ん中が約2px上にあるので、その分だけ下げる */
+  h1 .wordmark { height: 48px; position: relative; top: 2px; min-width: 0; max-width: calc(100% - 78px); object-fit: contain; object-position: left center; }
   /* ダークモードでは文字ロゴだけ白に。シールは白地に黒のまま（貼ったシールなので色は変わらない） */
   @media (prefers-color-scheme: dark) {
     h1 .wordmark { filter: invert(1); }
