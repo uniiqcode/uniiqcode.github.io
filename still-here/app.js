@@ -48,6 +48,16 @@
     ['#13171C', '#ECE8DF'], // 22
     ['#12161A', '#ECE8DF']  // 23
   ];
+  function hexRgb(h) { return [1, 3, 5].map(function (i) { return parseInt(h.substr(i, 2), 16); }); }
+  function mixHex(a, b, t) {
+    var x = hexRgb(a), y = hexRgb(b);
+    return '#' + x.map(function (v, i) { var n = Math.round(v + (y[i] - v) * t); return (n < 16 ? '0' : '') + n.toString(16); }).join('');
+  }
+  function luminance(h) {
+    var c = hexRgb(h).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function contrast(a, b) { var x = luminance(a), y = luminance(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
   var forcedHour = params.has('h') ? parseInt(params.get('h'), 10) : NaN;
   var shownHour = -1;
   function applyColor(hour) {
@@ -58,6 +68,10 @@
     var root = document.documentElement.style;
     root.setProperty('--bg', c[0]);
     root.setProperty('--fg', c[1]);
+    // SLEEP ボタン用: 背景色と文字色のちょうど中間の色。その上の文字は、中間色とのコントラストが高い方(文字色か背景色)
+    var mid = mixHex(c[0], c[1], 0.5);
+    root.setProperty('--mid', mid);
+    root.setProperty('--mid-fg', contrast(mid, c[1]) >= contrast(mid, c[0]) ? c[1] : c[0]);
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', c[0]);
   }
@@ -268,7 +282,10 @@
   ];
   var STORE_ST = 'still-here-station-v2'; // v2: 局を9局にした(番号の意味が変わったため)
   var audio = $('audio');
-  var selected = 0, isOn = false, buttons = [];
+  // 先頭のボタンは押すたびに OFF → ON → SLEEP → OFF と変わる。
+  // SLEEP: 60分再生して自動で OFF。局を切り替えても残り時間はそのまま。手動で OFF にすると取り消し。
+  var SLEEP_MS = 60 * 60 * 1000;
+  var selected = 0, mode = 'off', isOn = false, sleepEnd = 0, sleepTimer = null, buttons = [];
   try { var saved = parseInt(localStorage.getItem(STORE_ST), 10); if (saved >= 0 && saved < STATIONS.length) selected = saved; } catch (e) {}
 
   function resolvePls() {
@@ -286,9 +303,40 @@
   function renderRadio() {
     buttons.forEach(function (b, i) { b.className = i === selected ? 'on' : ''; b.setAttribute('aria-pressed', i === selected ? 'true' : 'false'); });
     var p = $('power');
-    p.textContent = isOn ? 'ON' : 'OFF';
-    p.className = isOn ? 'power on' : 'power';
+    if (mode === 'sleep') {
+      p.innerHTML = 'SLEEP<small id="sleep-left"></small>';
+      renderSleepLeft();
+    } else {
+      p.textContent = mode === 'on' ? 'ON' : 'OFF';
+    }
+    p.className = 'power' + (mode === 'on' ? ' on' : mode === 'sleep' ? ' sleep' : '');
     p.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+  }
+  // 残り時間(分)。秒は四捨五入
+  function renderSleepLeft() {
+    var el = $('sleep-left');
+    if (!el) return;
+    var left = Math.max(0, sleepEnd - Date.now());
+    el.textContent = Math.round(left / 60000) + ' min';
+  }
+  function checkSleep() {
+    if (mode !== 'sleep') return;
+    if (Date.now() >= sleepEnd) setMode('off'); else renderSleepLeft();
+  }
+  function setMode(m) {
+    var wasOn = isOn;
+    mode = m;
+    isOn = m !== 'off';
+    clearInterval(sleepTimer);
+    if (m === 'sleep') {
+      sleepEnd = Date.now() + SLEEP_MS;
+      sleepTimer = setInterval(checkSleep, 1000); // スリープから戻った時も時刻で判定するので、ずれない
+    } else {
+      sleepEnd = 0;
+    }
+    renderRadio();
+    if (isOn && !wasOn) connect();
+    if (!isOn && wasOn) disconnect();
   }
 
   function connect() {
@@ -323,9 +371,7 @@
       buttons.push(b);
     });
     $('power').addEventListener('click', function () {
-      isOn = !isOn;
-      renderRadio();
-      if (isOn) connect(); else disconnect();
+      setMode(mode === 'off' ? 'on' : mode === 'on' ? 'sleep' : 'off');
     });
     audio.addEventListener('playing', function () { if (isOn) setState(STATIONS[selected].name); });
     audio.addEventListener('waiting', function () { if (isOn) setState('接続中…'); });

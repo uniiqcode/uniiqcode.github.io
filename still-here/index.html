@@ -111,6 +111,9 @@
     -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
   }
   .radio button.on { background: var(--fg); color: var(--bg); }
+  /* SLEEP: 背景は背景色と文字色の中間色(app.js が --mid に入れる)。2段で、下段に残り時間 */
+  .radio button.sleep { background: var(--mid); color: var(--mid-fg); border-color: var(--mid); flex-direction: column; line-height: 1.1; }
+  .radio button.sleep small { display: block; font-size: 0.72em; margin-top: 0.15em; letter-spacing: 0; }
   /* ボタンの名前は 150% にしない(元の大きさ)。かわりに太字。Shippori Mincho は太字のファイルが無いので、ブラウザが太らせて表示する */
   .radio .power { letter-spacing: 0.1em; }
   .radio .state { text-align: center; margin-top: 0.6em; opacity: 0.75; min-height: 1.4em; }
