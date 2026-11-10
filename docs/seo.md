@@ -15,6 +15,7 @@
 | 数独 | `https://uniiqcode.com/games/sudoku/` | 数独（ナンプレ）｜無料・広告なし | 同上 |
 | 蘇州 | `https://uniiqcode.com/games/suzhou/` | 蘇州｜無料・広告なしの麻雀牌パズル | 同上 |
 | ここの天気 | `https://uniiqcode.com/weather/` | ここの天気｜今いる場所の雨と気温 | `WebApplication`（UtilitiesApplication） |
+| Still Here | `https://uniiqcode.com/still-here/` | Still Here｜古いスマホを時計・雨予報・ラジオに | `WebApplication`（UtilitiesApplication）。仕様は `docs/still-here.md` |
 | 業スー酒場 | `https://uniiqcode.com/gyosu-sakaba/` | （別のリポジトリ。`uniiqcode/gyosu-sakaba` の `docs/seo.md`） | `ItemList` |
 | コンビニ24H | `https://uniiqcode.com/konbini-24h/`（日本語・韓国語・繁体字・英語） | （別のリポジトリ。`uniiqcode/konbini-24h` の `docs/seo.md`） | `ItemList`＋`VideoObject` |
 
@@ -38,7 +39,7 @@
 2. メニュー（トップ・ゲームのメニュー）に足す時は、HTML の一覧・JSON-LD の `ItemList` の両方に足す。ゲームのメニューは JavaScript の `GAMES` にも足す
 3. `sitemap.xml` に `<url>` を1行足す。中身を変えたページは、その行の `<lastmod>` をその日にする
 4. 別のリポジトリで新しいアプリを公開したら、`robots.txt` に `Sitemap: https://uniiqcode.com/<リポジトリ名>/sitemap.xml` を足し、トップの一覧と `ItemList` にも足す
-5. Service Worker があるフォルダ（`games/`・`weather/`）の HTML を変えたら、その `sw.js` の `CACHE_NAME` の番号を上げる（上げないと古い HTML が出続ける）
+5. Service Worker があるフォルダ（`games/`・`weather/`・`still-here/`）の HTML を変えたら、その `sw.js` の `CACHE_NAME` の番号を上げる（上げないと古い HTML が出続ける）
 6. 公開後、Search Console でサイトマップを送信する（下）
 
 ## 公開後に人がすること（スキルの手順8）

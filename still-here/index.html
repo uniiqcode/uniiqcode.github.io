@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Still Here - 古いスマホを時計・雨予報・ラジオに | uniiqcode</title>
+<title>Still Here｜古いスマホを時計・雨予報・ラジオに</title>
 <meta name="description" content="眠っている古いスマホ（iOS15でも可）を置き時計に。手書き風の時刻、8時間以内の雨予報、日の出・日の入り、ネットラジオ9局を1画面に。色は1時間ごとに移ろい、深夜は暗く、焼き付きも防ぎます。無料・登録不要。">
 <link rel="canonical" href="https://uniiqcode.com/still-here/">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,8 +19,11 @@
 <meta property="og:description" content="眠っている古いスマホ（iOS15でも可）を置き時計に。手書き風の時刻、8時間以内の雨予報、日の出・日の入り、ネットラジオ9局を1画面に。色は1時間ごとに移ろい、深夜は暗く、焼き付きも防ぎます。無料・登録不要。">
 <meta property="og:url" content="https://uniiqcode.com/still-here/">
 <meta property="og:site_name" content="uniiqcode">
-<meta property="og:image" content="https://uniiqcode.com/still-here/icons/icon-512.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://uniiqcode.com/still-here/icons/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"Still Here","url":"https://uniiqcode.com/still-here/","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS, Android, Web","inLanguage":"ja","description":"眠っている古いスマホ（iOS15でも可）を置き時計に。手書き風の時刻、8時間以内の雨予報、日の出・日の入り、ネットラジオ9局を1画面に。色は1時間ごとに移ろい、深夜は暗く、焼き付きも防ぎます。無料・登録不要。","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}
 </script>
@@ -143,6 +146,8 @@
 </head>
 <body>
 <main>
+  <!-- 画面に見出しは出さないが、ページに見出しを1つ置く(検索対策。docs/seo.md) -->
+  <h1 style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0">Still Here</h1>
   <div class="col">
     <div class="timebox"><div class="time" id="time" aria-label="時刻"></div></div>
     <div class="info">
