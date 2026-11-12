@@ -252,15 +252,47 @@ function renderRadarLinks(st) {
 }
 
 // ---- 取得 -----------------------------------------------------------------
+// ---- 待ちすぎ防止 ------------------------------------------------------------
+// 2026年11月、iPhone で「更新しています…」のまま止まり、更新ボタンも押せなくなった。
+// 位置の取得や通信が、成功も失敗も返さずに待ち続けると起きる。どの段階でも上限時間で打ち切る。
+const GEO_TIMEOUT_MS = 15000;   // 端末に頼む位置取得の上限
+const GEO_WATCHDOG_MS = 20000;  // 端末が上限を守らず黙っている時の打ち切り
+const NET_TIMEOUT_MS = 15000;   // 予報・地名の通信の上限
+const MUNI_TIMEOUT_MS = 10000;  // 市区町村表の読み込みの上限
+
+function withTimeout(promise, ms, message) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(message)), ms); }),
+  ]).finally(() => clearTimeout(timer));
+}
+
+async function fetchWithTimeout(url, ms, what) {
+  const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = setTimeout(() => ctrl && ctrl.abort(), ms);
+  try {
+    return await withTimeout(fetch(url, ctrl ? { signal: ctrl.signal } : {}), ms + 500, `${what}が時間切れ`);
+  } catch (e) {
+    throw new Error(e && e.name === 'AbortError' ? `${what}が時間切れ` : (e.message.includes('時間切れ') ? e.message : `${what}に失敗(通信エラー)`));
+  } finally { clearTimeout(timer); }
+}
+
+// 位置の取得。失敗の理由を分けて返す(画面に出して原因を見分けるため)
+//   1 許可されていない / 2 端末が位置を出せない / 3 時間切れ / 返事なし(端末が黙ったまま)
 function getPosition() {
-  return new Promise((resolve, reject) => {
+  const p = new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) { reject(new Error('この端末では位置を取得できません')); return; }
     navigator.geolocation.getCurrentPosition(
-      (p) => resolve(p.coords),
-      (e) => reject(new Error(e.code === 1 ? '位置情報の利用が許可されていません。ブラウザの設定で許可してください' : '位置を取得できませんでした')),
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 5 * 60 * 1000 }
+      (pos) => resolve(pos.coords),
+      (e) => reject(new Error(
+        e.code === 1 ? '位置情報が許可されていません。ブラウザの設定で許可してください'
+          : e.code === 2 ? '端末が位置を出せませんでした(位置情報サービスを確認)'
+            : '位置の取得が時間切れ')),
+      { enableHighAccuracy: false, timeout: GEO_TIMEOUT_MS, maximumAge: 5 * 60 * 1000 }
     );
   });
+  return withTimeout(p, GEO_WATCHDOG_MS, '端末から位置の返事がありません');
 }
 
 async function fetchForecast(lat, lon) {
@@ -270,7 +302,7 @@ async function fetchForecast(lat, lon) {
     minutely_15: 'precipitation', forecast_minutely_15: '36',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max',
   });
-  const r = await fetch(`https://api.open-meteo.com/v1/forecast?${q}`);
+  const r = await fetchWithTimeout(`https://api.open-meteo.com/v1/forecast?${q}`, NET_TIMEOUT_MS, '予報の取得');
   if (!r.ok) throw new Error(`予報を取得できませんでした(${r.status})`);
   return r.json();
 }
@@ -286,8 +318,9 @@ function loadMuni() {
       window.GSI = window.GSI || {};
       const sc = document.createElement('script');
       sc.src = 'https://maps.gsi.go.jp/js/muni.js';
-      sc.onload = () => resolve(window.GSI.MUNI_ARRAY || null);
-      sc.onerror = () => { muniPromise = null; resolve(null); };
+      const timer = setTimeout(() => { muniPromise = null; resolve(null); }, MUNI_TIMEOUT_MS); // 町名だけで続ける
+      sc.onload = () => { clearTimeout(timer); resolve(window.GSI.MUNI_ARRAY || null); };
+      sc.onerror = () => { clearTimeout(timer); muniPromise = null; resolve(null); };
       document.head.appendChild(sc);
     });
   }
@@ -307,7 +340,7 @@ const PLACE_VER = 3; // 地名の作り方を変えたら上げる(保存して�
 async function fetchPlace(lat, lon) {
   try {
     const [r, table] = await Promise.all([
-      fetch(`https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lat=${lat}&lon=${lon}`),
+      fetchWithTimeout(`https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lat=${lat}&lon=${lon}`, NET_TIMEOUT_MS, '地名の取得'),
       loadMuni(),
     ]);
     if (!r.ok) return { name: '', muniCd: '' };
@@ -328,7 +361,8 @@ let busy = false;
 async function refresh() {
   if (busy) return;
   busy = true; $('reload').disabled = true;
-  $('meta').textContent = state ? '更新しています…' : '位置を取得しています…';
+  $('meta').textContent = '位置を取得しています…';
+  let posNote = ''; // 位置が取れず前回の場所を使った時の理由
   try {
     let lat, lon, pLat, pLon; // lat/lon: 予報用(約1km)、pLat/pLon: 地名用
     try {
@@ -340,7 +374,9 @@ async function refresh() {
       if (!state) throw e;
       lat = state.lat; lon = state.lon; // 位置が取れなければ前回の場所で
       pLat = state.pLat || lat; pLon = state.pLon || lon;
+      posNote = `前回の場所で表示(${e.message})`;
     }
+    $('meta').textContent = '予報を取得しています…';
     const samePlace = state && state.pLat === pLat && state.pLon === pLon && state.place && state.placeVer === PLACE_VER;
     const [data, place] = await Promise.all([
       fetchForecast(lat, lon),
@@ -349,10 +385,11 @@ async function refresh() {
     state = { lat, lon, pLat, pLon, place: place.name, muniCd: place.muniCd, placeVer: PLACE_VER, data, fetchedAt: Date.now() };
     save(state);
     renderAll(state);
+    if (posNote) $('meta').textContent += ` ・ ${posNote}`;
   } catch (e) {
     if (state) {
       renderAll(state);
-      $('meta').textContent += ` ・ ${e.message}`;
+      $('meta').textContent += ` ・ ${posNote ? posNote + '、' : ''}${e.message}`;
     } else {
       $('meta').innerHTML = `<span class="err">${esc(e.message)}</span>`;
       $('rainstart').innerHTML = '<div class="msg">表示できる予報がありません</div>';
