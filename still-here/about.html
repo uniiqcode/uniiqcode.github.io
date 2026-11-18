@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Still Here について｜位置情報・データの出典・ご利用の注意</title>
+<meta name="description" content="古いスマホを時計・雨予報・ラジオにするアプリ Still Here の説明。位置情報の扱い（約1km四方に丸めて天気予報サービスにだけ送り、作者には届かない）、データの出典、ラジオ局、ご利用上の注意。">
+<link rel="canonical" href="https://uniiqcode.com/still-here/about.html">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#F5F3EE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Still Here について">
+<meta property="og:description" content="位置情報の扱い、データの出典、ラジオ局、ご利用上の注意。">
+<meta property="og:url" content="https://uniiqcode.com/still-here/about.html">
+<meta property="og:site_name" content="uniiqcode">
+<meta property="og:image" content="https://uniiqcode.com/still-here/icons/og-image.png">
+<meta property="og:locale" content="ja_JP">
+<!--
+  Still Here の説明ページ(仕様: docs/still-here.md §6.7)。
+  中身を変えたら、sw.js の CACHE_NAME を上げる。位置情報・送り先の説明は app.js の実際の動きと合わせること。
+-->
+<style>
+  @font-face {
+    font-family: "Shippori Mincho"; font-style: normal; font-weight: 400; font-display: swap;
+    src: url("fonts/shippori-mincho-japanese-400-normal.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Shippori Mincho"; font-style: normal; font-weight: 400; font-display: swap;
+    src: url("fonts/shippori-mincho-latin-400-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+      U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+      U+FEFF, U+FFFD;
+  }
+  :root { --bg: #F5F3EE; --fg: #2B2D30; --sub: #5E5F61; --line: rgba(43, 45, 48, 0.2); }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #12161A; --fg: #ECE8DF; --sub: #A8A49C; --line: rgba(236, 232, 223, 0.2); }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font-family: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif; font-size: 17px; line-height: 1.85; }
+  main { max-width: 40em; margin: 0 auto;
+    padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+  .back { display: inline-block; color: var(--sub); text-decoration: none; font-size: 0.9em; margin-bottom: 1.2em; }
+  h1 { display: flex; align-items: center; font-size: 1.6em; font-weight: normal; letter-spacing: 0.05em; margin: 0 0 0.4em; }
+  h1 img { width: 56px; height: 56px; border-radius: 13px; margin-right: 14px; }
+  .lead { color: var(--sub); margin: 0 0 1.6em; }
+  h2 { font-size: 1.15em; font-weight: normal; letter-spacing: 0.05em; margin: 2.2em 0 0.6em; padding-bottom: 0.3em; border-bottom: 1px solid var(--line); }
+  p { margin: 0 0 0.8em; }
+  ul { margin: 0 0 0.8em; padding-left: 1.3em; }
+  li { margin-bottom: 0.3em; }
+  a { color: inherit; text-underline-offset: 0.2em; }
+  table { border-collapse: collapse; width: 100%; margin: 0.4em 0 1em; font-size: 0.95em; }
+  th, td { text-align: left; vertical-align: top; padding: 0.5em 0.4em; border-bottom: 1px solid var(--line); }
+  th { font-weight: normal; color: var(--sub); white-space: nowrap; width: 6.5em; }
+  .note { color: var(--sub); font-size: 0.9em; }
+  footer { margin-top: 3em; color: var(--sub); font-size: 0.85em; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← Still Here にもどる</a>
+  <h1><img src="icons/icon-192.png" alt="" width="56" height="56">Still Here について</h1>
+  <p class="lead">眠っている古いスマホを、置きっぱなしの時計・雨予報・ラジオにするアプリです。無料で、登録もいりません。</p>
+
+  <h2 id="privacy">位置情報とプライバシー</h2>
+  <p>雨予報と日の出・日の入りを出すためだけに、位置情報を使います。</p>
+  <table>
+    <tr><th>どれくらい</th><td>小数点以下2桁に丸めてから使います。約1km四方の精度で、住所や建物は分かりません。</td></tr>
+    <tr><th>送り先</th><td>天気予報サービスの <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> だけです。</td></tr>
+    <tr><th>保存</th><td>位置そのものは保存しません。取ってきた予報と選んだラジオ局は、お使いの端末のブラウザの中にだけ保存します。</td></tr>
+    <tr><th>作者には</th><td>届きません。このアプリには作者のサーバーがなく、アクセス解析や Cookie も使っていません。</td></tr>
+  </table>
+  <p>位置情報を使わなくても、時計とラジオはそのまま使えます。最初に「使わない」を選んだ場合は、雨予報の欄を押すと、もう一度選べます。</p>
+  <p class="note">インターネットの仕組み上、ページを開いた時は GitHub（このページの置き場所）に、雨予報を取る時は Open-Meteo に、ラジオを聴く時は各放送局に、お使いの回線の IP アドレスが伝わります。それぞれの扱いは各社の方針によります。</p>
+
+  <h2>データの出典</h2>
+  <ul>
+    <li>雨予報・日の出と日の入り: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（CC BY 4.0）</li>
+    <li>文字: Shippori Mincho（SIL Open Font License）。時刻の数字は自作の手書き風の数字です。</li>
+  </ul>
+
+  <h2>ラジオ局</h2>
+  <p>各放送局がインターネットで公開している放送を、お使いの端末から直接再生しています（このアプリは音声を中継していません）。ボタンの名前と放送局は次のとおりです。</p>
+  <table>
+    <tr><th>Ambient-Chillout</th><td>Groove Salad（<a href="https://somafm.com/" target="_blank" rel="noopener">SomaFM</a>）</td></tr>
+    <tr><th>Classic-Rock</th><td>Left Coast 70s（<a href="https://somafm.com/" target="_blank" rel="noopener">SomaFM</a>）</td></tr>
+    <tr><th>Classic-Vinyl</th><td>WALM Classic Vinyl HD（<a href="https://walmradio.com/" target="_blank" rel="noopener">WALM</a>）</td></tr>
+    <tr><th>Pop-Europe</th><td>PureClassix Radio</td></tr>
+    <tr><th>Smooth-Jazz 1</th><td><a href="https://smoothjazz.com.pl/" target="_blank" rel="noopener">SmoothJazz.com.pl</a></td></tr>
+    <tr><th>Smooth-Jazz 2</th><td><a href="https://relaxingjazz.com/" target="_blank" rel="noopener">RelaxingJazz.com</a></td></tr>
+    <tr><th>Meditation</th><td>SmoothLounge.com（<a href="https://www.smoothjazz.com/" target="_blank" rel="noopener">SmoothJazz.com</a>）</td></tr>
+    <tr><th>Bossa-Nova</th><td>Bossa Beyond（<a href="https://somafm.com/" target="_blank" rel="noopener">SomaFM</a>）</td></tr>
+    <tr><th>Classical-Audiophile</th><td>Naim Classical（<a href="https://www.naimaudio.com/" target="_blank" rel="noopener">Naim</a>）</td></tr>
+  </table>
+  <p class="note">放送局の都合で、放送が止まったり、つながらなくなったりすることがあります。SomaFM などは聴く人の寄付で運営されています。気に入った局があれば、各局のサイトもご覧ください。</p>
+
+  <h2>ご利用上の注意</h2>
+  <ul>
+    <li><strong>充電しっぱなしについて</strong>: 古いスマホを長いあいだ充電器につないだままにすると、電池がふくらむことがあります。ふくらみや熱に気をつけ、布団や燃えやすい物の上には置かないでください。iPhone は「設定 → バッテリー → バッテリーの状態と充電」で「バッテリー充電の最適化」をオンにしてください。</li>
+    <li><strong>古い端末について</strong>: 古い OS にはセキュリティの更新が届きません。このアプリは個人情報を扱いませんが、その端末ではアカウントへのログインや買い物をせず、置き時計専用にするのがおすすめです。</li>
+    <li><strong>雨予報は目安です</strong>: 降り始め・止む時刻は予報からの目安です。防災の判断には、気象庁などの情報をご確認ください。</li>
+    <li><strong>画面の点けっぱなし</strong>: 端末の「自動ロック」を「なし」にすると、画面が消えずに使えます。焼き付きを防ぐため、表示は1時間ごとに少しずつ位置を変えています。</li>
+  </ul>
+
+  <h2>ホーム画面に追加</h2>
+  <ul>
+    <li>iPhone: Safari で開き、共有ボタン（□に↑）→「ホーム画面に追加」</li>
+    <li>Android: Chrome で開き、右上の︙ →「ホーム画面に追加」（または「アプリをインストール」）</li>
+  </ul>
+  <p class="note">LINE や Facebook のアプリの中で開いた時は追加できません。Safari や Chrome で開き直してください。</p>
+
+  <footer>
+    作者: <a href="https://uniiqcode.com/">uniiqcode</a>
+  </footer>
+</main>
+</body>
+</html>

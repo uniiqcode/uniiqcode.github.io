@@ -19,10 +19,11 @@ const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v10→v11(2026年11月): 説明文(description・OGP・JSON-LD・manifest)を差し替えた。
 // v11→v12(2026年11月): アイコンを差し替えた(スタンドのスマホと両側のスピーカー)。見出し(h1)・共有用の画像を足した。
 // v12→v13(2026年11月): ON/OFF ボタンに SLEEP(60分で自動 OFF)を足した。
-const CACHE_NAME = CACHE_PREFIX + 'v13';
+// v13→v14(2026年11月): 位置情報の説明(許可画面の前)と、このアプリについてのページ(about.html)を足した。
+const CACHE_NAME = CACHE_PREFIX + 'v14';
 
 const APP_SHELL = [
-  './', 'index.html', 'app.js', 'manifest.json',
+  './', 'index.html', 'about.html', 'app.js', 'manifest.json',
   'icons/favicon-32.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
   'icons/icon-maskable-192.png', 'icons/icon-maskable-512.png', 'icons/og-image.png',
   'numerals/TN-0-v01.svg', 'numerals/TN-1-v01.svg', 'numerals/TN-2-v01.svg', 'numerals/TN-3-v01.svg',

@@ -241,10 +241,48 @@
     });
   }
 
+  // ---- 位置情報の同意 ------------------------------------------------------
+  // 初めて開いた時は、iPhone などの許可画面より先に、何に使うかを説明する(docs/still-here.md §5.1)。
+  // 「位置を使う」を押した時だけ位置を取る。「使わない」でも時計とラジオは使える。
+  var STORE_LOC = 'still-here-location-v1'; // 'yes' / 'no'
+  function locChoice() {
+    try {
+      var v = localStorage.getItem(STORE_LOC);
+      if (v) return v;
+      if (localStorage.getItem(STORE_FC)) return 'yes'; // この仕組みの前から使っている人(予報が保存済み)には聞かない
+    } catch (e) {}
+    return '';
+  }
+  function setLocChoice(v) { try { localStorage.setItem(STORE_LOC, v); } catch (e) {} }
+  function showNoLocation() {
+    clearTimeout(refreshTimer);
+    $('rain-main').innerHTML = '';
+    var a = document.createElement('a');
+    a.href = '#'; a.className = 'loc-link'; a.textContent = '雨予報は、位置情報を使うと表示します';
+    a.addEventListener('click', function (ev) { ev.preventDefault(); askLocation(); });
+    $('rain-main').appendChild(a);
+    $('rain-sub').textContent = '';
+  }
+  function askLocation() {
+    var bg = $('loc-dialog');
+    bg.style.display = 'flex';
+    $('loc-yes').onclick = function () { bg.style.display = 'none'; setLocChoice('yes'); $('rain-main').textContent = '雨予報を取得しています…'; refresh(); };
+    $('loc-no').onclick = function () { bg.style.display = 'none'; setLocChoice('no'); showNoLocation(); };
+  }
+  function startForecast() {
+    var c = locChoice();
+    if (c === 'yes') refresh();
+    else if (c === 'no') showNoLocation();
+    else askLocation();
+  }
+
   function refresh() {
+    if (locChoice() !== 'yes') return;
     clearTimeout(refreshTimer);
     refreshTimer = setTimeout(refresh, REFRESH_MS);
     return getPosition().then(function (c) { return fetchForecast(c.latitude, c.longitude); }).then(function (data) {
+      // 応答に入っている位置(予報の格子点の緯度経度)は使わないので消す。端末にも位置を残さないため(about.html の説明)
+      delete data.latitude; delete data.longitude;
       forecast = data;
       fetchedAt = Date.now();
       try { localStorage.setItem(STORE_FC, JSON.stringify({ data: data, at: fetchedAt })); } catch (e) {}
@@ -404,7 +442,7 @@
   tick();
   alignRight();
   setTimeout(function () { document.body.className = 'ready'; }, 50);
-  refresh();
+  startForecast();
   resolvePls();
 
   // 画面に戻った時、15分より古ければ取り直す(スリープ中は setTimeout が止まるため)

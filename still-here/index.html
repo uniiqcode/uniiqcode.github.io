@@ -144,6 +144,25 @@
     .rain .main { font-size: calc(var(--T) * 0.24 * var(--k)); }
     .rain .sub { font-size: calc(var(--T) * 0.15 * var(--k)); }
   }
+  /* このアプリについて(右上の小さな i) */
+  .about { position: fixed; top: max(8px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right));
+    width: 28px; height: 28px; border: 1px solid var(--fg); border-radius: 50%; color: var(--fg);
+    font: italic 16px/26px "Shippori Mincho", serif; text-align: center; text-decoration: none; opacity: 0.45; }
+  .loc-link { color: inherit; text-decoration: underline; text-underline-offset: 0.2em; }
+  /* 位置情報の説明(許可画面より先に出す)。色は画面と同じ */
+  .loc-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; display: none;
+    align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.45); }
+  .loc-box { max-width: 26em; width: 100%; background: var(--bg); color: var(--fg); border: 1px solid var(--fg);
+    border-radius: 14px; padding: 1.4em 1.3em 1.2em; font-size: 16px; line-height: 1.7; }
+  .loc-box h2 { margin: 0 0 0.6em; font-size: 1.15em; font-weight: normal; letter-spacing: 0.05em; }
+  .loc-box p { margin: 0 0 0.6em; }
+  .loc-box .more { font-size: 0.85em; opacity: 0.75; }
+  .loc-box .more a { color: inherit; }
+  .loc-btns { display: flex; margin-top: 1em; }
+  .loc-btns button { flex: 1; font: inherit; font-weight: bold; padding: 0.7em 0.5em; border-radius: 0.5em;
+    border: 1px solid var(--fg); background: transparent; color: var(--fg); -webkit-appearance: none; appearance: none; }
+  .loc-btns button + button { margin-left: 0.6em; }
+  .loc-btns #loc-yes { background: var(--fg); color: var(--bg); }
   .debug { position: fixed; left: 4px; bottom: 4px; font: 11px monospace; opacity: 0.6; }
 </style>
 </head>
@@ -173,6 +192,16 @@
       <audio id="audio" preload="none"></audio>
     </section>
 </main>
+<a class="about" href="about.html" aria-label="このアプリについて">i</a>
+<div class="loc-bg" id="loc-dialog" role="dialog" aria-modal="true" aria-labelledby="loc-title">
+  <div class="loc-box">
+    <h2 id="loc-title">位置情報について</h2>
+    <p>雨予報のために、だいたいの場所（約1km四方）を使います。</p>
+    <p>位置は天気予報サービス（Open-Meteo）にだけ送り、作者には届きません。保存もしません。</p>
+    <p class="more">使わなくても、時計とラジオはそのまま使えます。<a href="about.html#privacy">くわしく</a></p>
+    <div class="loc-btns"><button type="button" id="loc-yes">位置を使う</button><button type="button" id="loc-no">使わない</button></div>
+  </div>
+</div>
 <noscript><p style="text-align:center">JavaScript を有効にしてください。</p></noscript>
 <script src="app.js"></script>
 <script src="../assets/a2hs.js" data-app="Still Here" defer></script>
