@@ -109,7 +109,7 @@ clock01.html（niisan.tv の「時①」）のレイアウトをもとにする�
 
 ### 局（当面9局）
 
-niisan.tv の `stations.txt` から選んだ。https の局だけを使う（uniiqcode.com は https なので、`http://` の局はブラウザが再生を止める）。FLAC の局は、iPhone で再生できないことが多く通信量も大きいので使わない。
+niisan.tv の `stations.txt` から選んだ（世界中のネットラジオ局を探し、高音質＝256kbps以上を条件に絞り込んだ局のリスト）。about.html にも経緯と各局の音質を書いている。https の局だけを使う（uniiqcode.com は https なので、`http://` の局はブラウザが再生を止める）。FLAC の局は、iPhone で再生できないことが多く通信量も大きいので使わない。
 
 | ボタン | 局 | 大分類 | URL（stations.txt） |
 |---|---|---|---|
