@@ -61,6 +61,8 @@
   body.ready { transition: background-color 2s linear, color 2s linear; }
   main {
     min-height: 100vh;
+    /* iPhone の Safari では 100vh がツールバーを含んだ高さになり、下が切れる。app.js が実際に見えている高さを --app-h に入れる */
+    min-height: var(--app-h, 100vh);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -133,7 +135,7 @@
     :root { --k: 1.25; }
     /* 左の列に時刻〜日の出・日の入り、右の列に雨予報とラジオ(下端は日の出・日の入りにそろえる。app.js の alignRight) */
     main {
-      height: 100vh; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto auto 1fr;
+      height: 100vh; height: var(--app-h, 100vh); display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto auto 1fr;
       grid-column-gap: 3vw; align-items: center; justify-items: center;
     }
     /* 左の列: 時刻は上端と曜日の真ん中。曜日〜日の出/日の入りは列の下寄り */
