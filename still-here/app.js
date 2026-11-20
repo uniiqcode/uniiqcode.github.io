@@ -428,8 +428,12 @@
     rain.style.transform = radio.style.transform = t;
   }
   var alignTimer = null;
-  function alignSoon() { clearTimeout(alignTimer); alignTimer = setTimeout(alignRight, 100); }
-  window.addEventListener('resize', alignSoon);
+  // 画面の高さは、実際に見えている高さ(innerHeight)を使う。
+  // iPhone の Safari では CSS の 100vh がツールバーの分だけ大きく、ラジオの下の行(局の名前)が切れるため。
+  function setAppHeight() { document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px'); }
+  setAppHeight();
+  function alignSoon() { clearTimeout(alignTimer); alignTimer = setTimeout(function () { setAppHeight(); alignRight(); }, 100); }
+  window.addEventListener('resize', function () { setAppHeight(); alignSoon(); });
   window.addEventListener('orientationchange', alignSoon);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignRight);
 

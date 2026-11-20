@@ -21,7 +21,8 @@ const CACHE_PREFIX = 'uniiqcode-still-here-';
 // v12→v13(2026年11月): ON/OFF ボタンに SLEEP(60分で自動 OFF)を足した。
 // v13→v14(2026年11月): 位置情報の説明(許可画面の前)と、このアプリについてのページ(about.html)を足した。
 // v14→v15(2026年11月): about.html にラジオ局を選んだ経緯と各局の音質を足した。
-const CACHE_NAME = CACHE_PREFIX + 'v15';
+// v15→v16(2026年11月): 画面の高さを実際に見えている高さにした(iPhone の Safari で局の名前が下で切れるため)。
+const CACHE_NAME = CACHE_PREFIX + 'v16';
 
 const APP_SHELL = [
   './', 'index.html', 'about.html', 'app.js', 'manifest.json',
