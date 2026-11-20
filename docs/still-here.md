@@ -134,12 +134,11 @@ niisan.tv の `stations.txt` から選んだ（世界中のネットラジオ局
 ## 6.5 ホーム画面に追加
 
 - `manifest.json`（standalone）、アイコン（`icons/`）、`apple-touch-icon` を用意した。
-- アイコン: 木のスタンドに立つ小さめのスマホと、両側のミニスピーカー。画面に琥珀色に光る「12」。レトロ調で、スマホが余生を楽しんでいる感じ（2026-11-10）。
-  - 元画像は ChatGPT で生成し、浮かんでいた音符を消して採用した（Claude・Gemini の案と比べて選んだ）。
-  - 元画像（音符を消したもの、1254px）: `docs/still-here/icon-source.webp`。サイズを作り直す時はここから。
-  - 512・192・180（apple-touch-icon）・32（favicon）px と、ホーム画面で丸く切られる用の `icon-maskable-*.png`（絵を78%に縮めて地の色の上に置いたもの）。
-- オフライン用の `sw.js` は自分のファイルだけを保存する。ファイルを変えたら `CACHE_NAME` を上げる。
-- 「ホーム画面に追加」ボタンは共通部品 `assets/a2hs.js` を使う。
+- アイコン（2026-11-20 に差し替え）: 中央にスタンドに立つスマホ、両側にスピーカー。アプリの画面と同じく、砂色の地に墨色の線だけで描いたシンプルな線画。画面の「12」はアプリの時刻と同じ travelフォント。
+  - Gemini で作った線画案の形を、図形（SVG）で描き直したもの。線を太くして60pxでも見えるようにし、丸く切られても欠けないよう全体を少し縮めた。
+  - 元の絵: `docs/still-here/icon.svg`。作り直し方は `tools/still-here-icon/README.md`。
+  - 512・192・180（apple-touch-icon）・32（favicon）px、丸く切られる用の `icon-maskable-*.png`（絵を78%に縮めたもの）、SNS用の `og-image.png`。
+  - 前のアイコン（ChatGPT で作った、木のスタンドと光る「12」の絵）は `docs/still-here/icon-v1-chatgpt.webp`。絵としてはよいが、画面のシンプルでクールな雰囲気と違うので替えた。
 
 ## 6.7 このアプリについて（about.html）
 
