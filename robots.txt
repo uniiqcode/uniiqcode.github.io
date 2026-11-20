@@ -5,6 +5,10 @@ Allow: /
 # ロゴを作り直すための道具と、作業の文書(検索結果に出す必要がない)
 Disallow: /tools/
 Disallow: /docs/
+# Claude 用の作業メモ(CLAUDE.md・STATUS.md・.claude/)
+Disallow: /CLAUDE.md
+Disallow: /STATUS.md
+Disallow: /.claude/
 
 Sitemap: https://uniiqcode.com/sitemap.xml
 Sitemap: https://uniiqcode.com/gyosu-sakaba/sitemap.xml
