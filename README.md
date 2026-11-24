@@ -17,16 +17,17 @@
 
 ## ロゴとアイコン
 
-- `assets/logo/uniiqcode-wordmark.svg` … 文字ロゴ「Uniiqcode」（背景透明・黒1色）
-- `assets/logo/uniiqcode-u.svg` … Uマーク（背景透明・黒1色）
+- `assets/logo/uniiqcode-wordmark.svg` … 文字ロゴ「Uniiqcode」（背景透明・黒、ii の点はグレー #8c8c8c）
+- `assets/logo/uniiqcode-u.svg` … Uマーク（背景透明・黒、点はグレー #8c8c8c）
+- ロゴの元の絵と、アイコンの作り直し方は `tools/logo/README.md`（2026-11-25 に作り直した）
 - `favicon.svg` / `favicon.ico` / `apple-touch-icon.png` … トップページのアイコン（Uマークから作成）
 - `manifest.webmanifest` と `assets/icons/uniiqcode-192.png` / `-512.png` / `-maskable-512.png` … スマホのホーム画面に登録した時のアイコンと名前（Uniiqcode）
 - `assets/og-image.png` … SNSでリンクを共有した時に出る画像（1200×630、ワードマーク）
-- `assets/logo/uniiqcode-u-3d.png` / `uniiqcode-u-3d-on-dark.png` … 立体のUマーク（1024×1024・背景透明）。白い背景用は黒に近いグレー、暗い背景用は明るいグレー。作り直す時は `tools/logo-3d/README.md`
+- `assets/logo/uniiqcode-u-3d.png` / `uniiqcode-u-3d-on-dark.png` … 立体のUマーク（1024×1024・背景透明。2026-11-25 より前の形のまま）。白い背景用は黒に近いグレー、暗い背景用は明るいグレー。作り直す時は `tools/logo-3d/README.md`
 - `assets/icons/gyosu-sakaba.png` … 業スー酒場のアイコン（`uniiqcode/gyosu-sakaba` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
 - `assets/icons/konbini-24h.png` … コンビニ24H のアイコン（`uniiqcode/konbini-24h` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
 - `assets/icons/yado-kuchikomi.png` … 宿の口コミのアイコン（`uniiqcode/yado-kuchikomi` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
-- 暗い背景では、CSS の `filter: invert(1)` で白にして使う
+- 暗い背景では、CSS の `filter: invert(1)` で白にして使う（点のグレーは少し濃いグレーになる）
 
 ## 検索対策（SEO）
 
