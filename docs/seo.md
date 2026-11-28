@@ -18,6 +18,7 @@
 | Still Here | `https://uniiqcode.com/still-here/` | Still Here｜古いスマホを時計・雨予報・ラジオに | `WebApplication`（UtilitiesApplication）。仕様は `docs/still-here.md` |
 | 業スー酒場 | `https://uniiqcode.com/gyosu-sakaba/` | （別のリポジトリ。`uniiqcode/gyosu-sakaba` の `docs/seo.md`） | `ItemList` |
 | コンビニ24H | `https://uniiqcode.com/konbini-24h/`（日本語・韓国語・繁体字・英語） | （別のリポジトリ。`uniiqcode/konbini-24h` の `docs/seo.md`） | `ItemList`＋`VideoObject` |
+| 花しらべ | `https://uniiqcode.com/hana-shirabe/` | （別のリポジトリ。`uniiqcode/hana-shirabe`） | — |
 
 ## 入れたもの（スキルの手順との対応）
 

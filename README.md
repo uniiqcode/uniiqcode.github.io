@@ -27,6 +27,7 @@
 - `assets/icons/gyosu-sakaba.png` … 業スー酒場のアイコン（`uniiqcode/gyosu-sakaba` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
 - `assets/icons/konbini-24h.png` … コンビニ24H のアイコン（`uniiqcode/konbini-24h` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
 - `assets/icons/yado-kuchikomi.png` … 宿の口コミのアイコン（`uniiqcode/yado-kuchikomi` の `site/assets/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
+- `assets/icons/hana-shirabe.png` … 花しらべのアイコン（`uniiqcode/hana-shirabe` の `icons/icon-192.png` を複製したもの。向こうで変えたら、こちらも差し替える）
 - 暗い背景では、CSS の `filter: invert(1)` で白にして使う（点のグレーは少し濃いグレーになる）
 
 ## 検索対策（SEO）
