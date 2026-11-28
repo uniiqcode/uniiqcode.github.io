@@ -33,6 +33,9 @@
       U+FEFF, U+FFFD;
   }
   :root { --bg: #F5F3EE; --fg: #2B2D30; --sub: #5E5F61; --line: rgba(43, 45, 48, 0.2); }
+  /* 右上の i(ホーム画面に追加する方法、assets/home-guide.js)。色は画面と同じ */
+  :root { --hg-accent: var(--fg); --hg-btn-bg: var(--bg); --hg-card: var(--bg); --hg-ink: var(--fg); --hg-sub: var(--sub);
+    --hg-line: var(--line); --hg-field: transparent; --hg-on-accent: var(--bg); --hg-head-font: "Shippori Mincho", serif; }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #12161A; --fg: #ECE8DF; --sub: #A8A49C; --line: rgba(236, 232, 223, 0.2); }
   }
@@ -116,5 +119,7 @@
     作者: <a href="https://uniiqcode.com/">uniiqcode</a>
   </footer>
 </main>
+<!-- 右上の i: ホーム画面に追加する方法(uniiqcode のアプリ共通、assets/home-guide.js) -->
+<script src="../assets/home-guide.js" data-app="Still Here" data-url="https://uniiqcode.com/still-here/" defer></script>
 </body>
 </html>

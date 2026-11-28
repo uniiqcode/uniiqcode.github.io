@@ -65,6 +65,9 @@
 -->
 <style>
   :root {
+    /* 右上の i(ホーム画面に追加する方法、assets/home-guide.js)の色 */
+    --hg-accent: #F3F1E8; --hg-btn-bg: rgba(255, 255, 255, 0.07); --hg-card: #1E2939; --hg-ink: #F3F1E8;
+    --hg-sub: #A9B3C1; --hg-line: rgba(255, 255, 255, 0.14); --hg-field: #141B25; --hg-on-accent: #141B25;
     --bg1: #24324A;
     --bg2: #141B25;
     --text: #F3F1E8;
@@ -278,6 +281,8 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
 })();
 </script>
+<!-- 右上の i: ホーム画面に追加する方法(uniiqcode のアプリ共通、assets/home-guide.js) -->
+<script src="../assets/home-guide.js" data-app="ゲーム" data-url="https://uniiqcode.com/games/" defer></script>
 <!-- 「ホーム画面に追加」ボタン(uniiqcode のアプリ共通、assets/a2hs.js) -->
 <script src="../assets/a2hs.js" data-app="ゲーム" defer></script>
 </body>

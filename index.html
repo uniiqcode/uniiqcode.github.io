@@ -33,9 +33,13 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "Uniiqcode", "url": "https://uniiqcode.com/", "inLanguage": "ja", "description": "Uniiqcodeは、少ない人数でも使う人が喜ぶ、世の中にない・珍しいウェブアプリを小さく作っています。広告のない無料ゲーム、今いる場所の天気、業務スーパーの食材で作る居酒屋の一品ネタ帳、古いスマホを時計とラジオにするアプリ、クチコミを読んで選んだ田舎の宿と遍路宿の紹介を公開中。"}, {"@type": "ItemList", "name": "Uniiqcode のアプリ", "url": "https://uniiqcode.com/", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ゲーム", "url": "https://uniiqcode.com/games/"}, {"@type": "ListItem", "position": 2, "name": "ここの天気", "url": "https://uniiqcode.com/weather/"}, {"@type": "ListItem", "position": 3, "name": "業スー酒場", "url": "https://uniiqcode.com/gyosu-sakaba/"}, {"@type": "ListItem", "position": 4, "name": "コンビニ24H", "url": "https://uniiqcode.com/konbini-24h/"}, {"@type": "ListItem", "position": 5, "name": "Still Here", "url": "https://uniiqcode.com/still-here/"}, {"@type": "ListItem", "position": 6, "name": "宿の口コミ", "url": "https://uniiqcode.com/yado-kuchikomi/"}]}]}</script>
 <style>
   /* 背景は真っ白ではなく、少し温かみのある薄いグレー（まぶしさを抑え、白いアイコンの縁も見える） */
-  :root { --bg: #ece9e2; --line: rgba(0, 0, 0, 0.14); --focus: #0969da; }
+  :root { --bg: #ece9e2; --line: rgba(0, 0, 0, 0.14); --focus: #0969da;
+    /* 右上の i（ホーム画面に追加する方法、assets/home-guide.js）の色 */
+    --hg-accent: #1d2733; --hg-btn-bg: #fff; --hg-card: #fff; --hg-field: #ece9e2; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0d1117; --line: rgba(255, 255, 255, 0.16); --focus: #4493f8; }
+    :root { --bg: #0d1117; --line: rgba(255, 255, 255, 0.16); --focus: #4493f8;
+      --hg-accent: #e6edf3; --hg-btn-bg: #161b22; --hg-card: #161b22; --hg-ink: #e6edf3; --hg-sub: #9aa4af;
+      --hg-line: rgba(255, 255, 255, 0.16); --hg-field: #0d1117; --hg-on-accent: #0d1117; }
   }
   body { margin: 0; background: var(--bg); }
   main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
@@ -80,5 +84,7 @@
     <li><a href="yado-kuchikomi/"><img src="assets/icons/yado-kuchikomi.png" width="192" height="192" alt="宿の口コミ" title="宿の口コミ"></a></li>
   </ul>
 </main>
+<!-- 右上の i: ホーム画面に追加する方法（uniiqcode のアプリ共通、assets/home-guide.js） -->
+<script src="assets/home-guide.js" data-app="uniiqcode" data-url="https://uniiqcode.com/" defer></script>
 </body>
 </html>

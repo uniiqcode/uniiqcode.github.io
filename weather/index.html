@@ -47,6 +47,9 @@
       --accent: #5aa2ff; --rain: #4c9bff; --warn: #fb923c; --hot: #ff8a5c; --cold: #74b9ff;
     }
   }
+  /* 見出しの i(ホーム画面に追加する方法、assets/home-guide.js)の色 */
+  :root { --hg-accent: var(--accent); --hg-btn-bg: var(--card); --hg-card: var(--card); --hg-ink: var(--text);
+    --hg-sub: var(--sub); --hg-line: var(--line); --hg-field: var(--bg); }
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
@@ -177,6 +180,8 @@
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
+<!-- 見出しの「更新」の左の i: ホーム画面に追加する方法(uniiqcode のアプリ共通、assets/home-guide.js) -->
+<script src="../assets/home-guide.js" data-app="ここの天気" data-url="https://uniiqcode.com/weather/" data-target="#reload" data-where="before" defer></script>
 <!-- 「ホーム画面に追加」ボタン(uniiqcode のアプリ共通、assets/a2hs.js) -->
 <script src="../assets/a2hs.js" data-app="ここの天気" defer></script>
 </body>
